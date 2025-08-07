@@ -1,0 +1,102 @@
+@font-face {
+  font-family: 'shabnam';
+  src: url('/font/Shabnam.woff2') format('woff2'),
+       url('/font/Shabnam.woff') format('woff'),
+       url('/font/Shabnam.ttf') format('truetype'),
+       url('/font/Shabnam.eot') format('embedded-opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'vazir';
+  src: url('/font/Vazir.woff2') format('woff2'),
+       url('/font/Vazir.woff') format('woff'),
+       url('/font/Vazir.ttf') format('truetype'),
+       url('/font/Vazir.eot') format('embedded-opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+:root{
+    --primaryOne-font : shabnam;
+    --primaryTwo-font : vazir;
+    --jfv-header-bg-dark: #0a224c;
+    --jfv-header-bg-light: #fff;
+    --jfv-header-font-dark: #0a224c ;
+    --jfv-header-font-light: #fff;
+    --jfv-button-bg-signUp: rgb(255, 97, 0);
+    --jfv-button-bg-signUp-hover: rgb(221, 96, 19);
+    --jfv-orange-font-dark: #ff6100;
+    --jfv-button-bg-google: #0070f3;
+    --jfv-blue-400:  #09f;;
+    --jfv-button-bg-microsoft: #2e2e2e;
+    --jfv-title-p-font-light: #545E94;
+    --jfv-yellow-400: #ffb629;
+    --jfv-blue-border: #252d5b;
+    --jfv-blue-light: #343c6a;
+    --jfv-gray-300: #C8CEED;
+    --jfv-gray-100: #bfd7ed73;
+    --jfv-gray-200: #c5d8eeb8;
+    --jfv-gray-400: #454e80;
+    --jfv-gray-500: #aeb2ce;
+    --jfv-red-200: #fecaca;
+    --jfv-orange-100: #fcf1e1;
+    --jfv-or-light: #24356A99;
+    --jfv-blue-p-tag-dark: #1f2a68;
+    --jfv-free-dark: #0A1551;
+    --jfv-bottom-signUp: #0c174e;
+    --jfv-google-apple-blue: #0a1551;
+    --jfv-withe-dark: #a6abc6;
+    --jfv-terms-color: #454e80;
+    --bg-opacity: 0.3;
+}
+
+*{
+    box-sizing: border-box;
+}
+
+@keyframes animPulse{
+    0%{
+        transform: scale(1);
+    }
+    25%{
+        opacity: .4;
+    }
+    100%{
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+body{
+    margin: 0;
+    font-family: var(--primaryOne-font) , var(--primaryTwo-font);
+    direction: rtl;
+    
+}
+
+
+.container{
+    flex-wrap: wrap;
+}
+
+a{
+  text-decoration: none;
+  color: var(--jfv-header-font-dark);
+}
+
+button{
+  cursor: pointer;
+}
+
+ul{
+  margin: 0;
+  padding: 0;
+}
+
+
+
+
+

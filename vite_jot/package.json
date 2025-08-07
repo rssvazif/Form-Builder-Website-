@@ -1,0 +1,22 @@
+{
+  "name": "vite_jot",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vueuse/core": "^13.5.0",
+    "pinia": "^3.0.3",
+    "v-click-outside": "^3.2.0",
+    "vue": "^3.3.8",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.0",
+    "vite": "^5.0.0"
+  }
+}

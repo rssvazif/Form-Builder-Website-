@@ -1,0 +1,86 @@
+<script setup>
+const props = defineProps({
+    isActive:{
+        type:Boolean,
+        default: false
+    }
+})
+</script>
+
+<template>
+    <div class="LongText-com">
+        <div class="border-blue" :class="{active_heading:isActive}">
+            <div class="label-name">
+                سوال یادداشت کنید
+            </div>
+            <div class="input-box">
+                <span>
+                    <textarea name="" id="" :disabled="isActive" :class="{move_input:isActive}"></textarea>
+                </span>
+                <span v-if="isActive">
+                    یک زیر برچسب یادداشت کنید
+                </span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.LongText-com{
+    padding: 0 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.border-blue{
+    margin: 12px 4px ;
+    padding: 12px 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    border: 2.5px solid #fff;
+    border-radius: 4px;
+    position: relative;
+}
+.active_heading{
+    border: 2.5px solid #3595f6;
+    cursor: move;
+}
+.move_input{
+    cursor: move;
+}
+.label-name{
+    display: flex;
+    justify-content: start;
+    width: 100%;
+    color: #2c3345;
+    margin: 0 0 15px;
+    padding-right: 10px;
+}
+.input-box{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0 10px ;
+}
+.input-box span{
+    font-size: 12px;
+    padding: 7px 0;
+    color: #636a96;
+    display: flex;
+}
+.input-box span textarea{
+    width: 100%;
+    outline: none;
+    border: 1px solid #b8bdc9 ;
+    border-radius: 4px;
+    min-height: 130px;
+    background-color: inherit;
+    font-family: inherit;
+    font-size: 14px;
+    color: #b8bdc9;
+    padding: 5px 8px;
+}
+</style>
