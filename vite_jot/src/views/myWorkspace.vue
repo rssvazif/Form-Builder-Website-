@@ -3,9 +3,10 @@
     import logo_without from '../components/logo_without_b.vue'
     import footer_page from '../components/footer_endPage_others.vue'
     import menu_bar_myWork from '../components/menu_bar_myWork.vue'
+    import signUp from '../components/signUp.vue'
     import { useSignUp_LoginStore } from '../../stores/SignUp_LoginStore'
 
-    import {ref,onMounted} from 'vue'
+    import {ref,onMounted, onUnmounted,computed} from 'vue'
 
     const user_store = useSignUp_LoginStore()
     const type_page = ref(false);
@@ -36,6 +37,11 @@
     const change_name_label = ref(false)
     const Login_on = ref(false)
     const SignUp_on = ref(false)
+    const open_menu_template = ref(false)
+    const open_menu_product = ref(false)
+    const open_menu_support = ref(false)
+    const username_or_email = ref('')
+    const password_login = ref('')
     const menu_sort = [
         {id:0,text:'حروف الفبا [ آ - ی ]'},
         {id:1, text: 'تاریخ ساخت'},
@@ -53,10 +59,16 @@
     const User_Name = ref('')
     const open_menu = ref(false)
     const box_content = ref(false)
+    const tuggle = ref(false)
+    const windowWidth = ref(window.innerWidth)
     
-    function print_myname(){
-        console.log('Reza');
+    function windowControler(){
+        windowWidth.value = window.innerWidth
+        if(windowWidth.value >= 992){
+            tuggle.value = false
+        }
     }
+
     function tuggle_page(){
         type_page.value = !type_page.value;
     }
@@ -78,10 +90,18 @@
     onMounted(()=>{
         document.addEventListener('click', handleClickSettingLabel)
         document.addEventListener('click', handleClickOutside)
+        window.addEventListener('resize' , windowControler);
+        windowControler()
         get_labels()
         get_all_Forms()
         get_userName()
-
+        if(window.innerWidth > 360){
+            Login_on.value = false
+            SignUp_on.value = false
+        }
+    })
+    onUnmounted(()=>{
+        window.removeEventListener('resize', windowControler)
     })
     const handleClickOutside = (event) => {
         if(event.target.closest('.delete-form-tool-box')) return
@@ -299,6 +319,7 @@
             active_products.value = false
             div_label.value = false
             user_store.open_SignUp = true
+            SignUp_on.value = true
             return
         }
     }
@@ -425,6 +446,118 @@
     function back_home(){
         window.location.href = '/'
     }
+    const New_User = {
+    username: '',
+    email: '',
+    password:''
+}
+const password_again = ref('')
+const user_email = ref('')
+const accept_email = ref(false)
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const isEmailValid = computed(() => {
+  return emailRegex.test(user_email.value);
+});
+function get_email() {
+  if(!user_email.value) {
+    text_error.value = 'لطفا ایمیل را وارد کنید'
+    return;
+  }
+  
+  if(!isEmailValid.value) {
+    user_email.value = ''
+    text_error.value = 'ایمیل نامعتبر است'
+    return;
+  }
+  
+  accept_email.value = true;
+}
+    async function send_new_user(e){
+        New_User.email = user_email.value;
+        if(New_User.password !== password_again.value){
+            text_error.value = 'عدم تطابق رمز عبور'
+            return
+        }
+        try{
+            if(New_User.password.length === 0 || New_User.email.length === 0){
+                text_error.value = 'تمام فیلد ها را تکمیل کنید'
+                return
+            }
+            const response = await fetch('/api/User',{
+                method: 'POST',
+                headers:{
+                    'Content-type':'application/json'
+                },
+                body: JSON.stringify(New_User)
+            })
+            if(!response.ok){
+                const errordata = await response.json()
+                console.log(errordata.message);
+                if(errordata.message === 'کاربر قبلا ثبت نام کرده است.'){
+                    text_error.value = 'شما قبلا ثبت نام کرده اید.'
+                }
+                throw new Error('error in response')
+            }
+            const data = await response.json()
+            const expiresIn = 24 * 60 * 60 * 1000;
+            const expiryTime = Date.now() + expiresIn;
+            localStorage.setItem('expiry',expiryTime.toString())
+            localStorage.setItem('token',data.token)
+
+            window.location.href = '/myWorkspace'
+            accept_email.value = false
+            user_email.value = ''
+            New_User.email = ''
+            New_User.password = ''
+            New_User.username = ''
+
+        }catch(error){
+            const Error = await response.json()
+            console.log('error in try block');
+            alert(Error.message)
+        }
+}
+async function login_User(){
+    try{
+        const token = localStorage.getItem('token')
+        if(token){
+            console.log('you logined up.');
+            window.location.href = '/'
+            return
+        }
+        const information = {
+            email_username: username_or_email.value,
+            password: password_login.value
+        }
+        const response = await fetch('/api/login',{
+            method:'POST',
+            headers:{
+                'Content-type':'application/json'
+            },
+            body: JSON.stringify(information)
+        })
+        if(!response.ok){
+            const errordata = await response.json()
+            if(errordata.message === 'user is not found.'){
+                text_error.value = 'حساب کاربری وجود ندارد.'
+            }else if(errordata.message === 'password is incorrect.'){
+                text_error.value = 'رمز عبور نادرست است.'
+            }
+            throw new Error(errordata.message)
+        }
+
+        const data = await response.json()
+        const expiresIn = 24 * 60 * 60 * 1000;
+        const expiryTime = Date.now() + expiresIn;
+        localStorage.setItem('expiry',expiryTime.toString())
+        localStorage.setItem('token',data.token)
+        window.location.href = '/myWorkspace'
+
+    }catch(error){
+        console.error(error.message);
+    }
+}
 </script>
 
 <template>
@@ -489,21 +622,213 @@
                     </button></li>
                 </ul>
             </div>
+            <div class="signUp_in_responsive" v-if="Login_on || user_store.open_Login">
+                <div style="padding: 15px 15px 0 15px;">
+                    <button class="close-add-label" @click="Login_on = false , user_store.open_Login= false , SignUp_on = false , user_store.open_SignUp= false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" fill="#B0BEC5" viewBox="0 0 24 24" ><path fill-rule="evenodd" d="M17.707 7.707a1 1 0 0 0-1.414-1.414L12 10.586 7.707 6.293a1 1 0 0 0-1.414 1.414L10.586 12l-4.293 4.293a1 1 0 1 0 1.414 1.414L12 13.414l4.293 4.293a1 1 0 0 0 1.414-1.414L13.414 12l4.293-4.293Z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                <div class="new-responsive-signUp">
+                    <h2>خوش آمدی!</h2>
+                    <p>اطلاعات، پرداخت‌ها و امضاها را با فرم‌های آنلاین سفارشی جمع‌آوری کن.</p>
+                    <p id="signUp-p">ورود با</p>
+                    <div class="signUp-with">
+                        <button>
+                            <span><svg fill="none" width="32" xmlns="http://www.w3.org/2000/svg" viewBox="2 1 32 32"><circle cx="18.5" cy="18" r="18" fill="white"></circle><path d="M30.8759 18.2751C30.8759 17.2576 30.7916 16.5151 30.6093 15.7451H18.7534V20.3376H25.7125C25.5723 21.4789 24.8146 23.1976 23.1309 24.3525L23.1073 24.5063L26.8559 27.3522L27.1156 27.3776C29.5008 25.2188 30.8759 22.0426 30.8759 18.2751Z" fill="#4285F4"></path><path d="M18.7518 30.3758C22.1612 30.3758 25.0234 29.2758 27.114 27.3783L23.1293 24.3532C22.063 25.082 20.6318 25.5907 18.7518 25.5907C15.4125 25.5907 12.5784 23.432 11.5681 20.4482L11.42 20.4606L7.52217 23.4169L7.47119 23.5557C9.54769 27.5982 13.813 30.3758 18.7518 30.3758Z" fill="#34A853"></path><path d="M11.5695 20.4475C11.303 19.6775 11.1487 18.8525 11.1487 18C11.1487 17.1475 11.303 16.3225 11.5555 15.5525L11.5485 15.3885L7.60177 12.3848L7.47264 12.445C6.61681 14.1225 6.12573 16.0063 6.12573 18C6.12573 19.9938 6.61681 21.8774 7.47264 23.555L11.5695 20.4475Z" fill="#FBBC05"></path><path d="M18.7519 10.4109C21.123 10.4109 22.7225 11.4147 23.6345 12.2535L27.1983 8.84348C25.0095 6.84973 22.1612 5.62598 18.7519 5.62598C13.813 5.62598 9.5477 8.40346 7.47119 12.4459L11.5541 15.5535C12.5784 12.5697 15.4126 10.4109 18.7519 10.4109Z" fill="#EB4335"></path></svg></span>
+                            <span>گوگل</span>
+                        </button>
+                        <button>
+                            <span><svg width="32" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="2 1 32 32"><rect x="19.8198" y="19.125" width="11.25" height="11.25" fill="#FEBA08"></rect><rect x="6.31982" y="19.125" width="11.25" height="11.25" fill="#05A6F0"></rect><rect x="19.8198" y="5.625" width="11.25" height="11.25" fill="#80BC06"></rect><rect x="6.31982" y="5.625" width="11.25" height="11.25" fill="#F25325"></rect></svg></span>
+                            <span>مایکروسافت</span>
+                        </button>
+                    </div>
+                    <div class="space" style="margin: 0 140px 12px;">
+                        <div class="thin"></div>
+                        <span>یا</span>
+                        <div class="thin"></div>
+                    </div>
+                    <div class="signUp-email">
+                        <span><label for="email-address" style="text-align: center;">ایمیل <small>یا</small> نام کاربری</label></span>
+                        <span><input type="text" key="email-address" v-model="username_or_email" @input="text_error = ''" style="width: 90%;"></span>
+                        <span style="margin: 15px 0 0;"><label style="text-align: center;" for="password-user">رمز عبور</label></span>
+                        <span style="margin: 0 0 25px;"><input style="width: 90%;" type="password" key="password-user" v-model="password_login" @input="text_error = ''"></span>
+                        <span v-if="text_error" style="color: red; padding: 5px 0;">{{ text_error }}</span>
+                        <span><button class="continue" @click="login_User()">ورود</button></span>
+                        <div class="login-box">
+                            حساب کاربری ندارید؟
+                            <button @click="user_store.change_box('SignUp'), Login_on = false,text_error = ''">ثبت نام</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div :class="{active: tuggle}" class="hidden-menu">
+                <ul class="topics">
+                    <li @click="go_workSpace()" v-if="false">صفحه کار من</li>
+                    <li class="topics-menu-down" @click="open_menu_template = !open_menu_template">
+                        <details>
+                            <summary :style="{color:open_menu_template?'#0075e3':''}">
+                                <span>قالب ها</span>
+                                <span class="arrow-sub-menu">
+                                    <svg width="16" style="transition: .3s ease;" :style="{transform: open_menu_template?'rotate(180deg)':''}" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 4"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.861934 0.195262C1.12228 -0.0650874 1.54439 -0.0650874 1.80474 0.195262L4 2.39052L6.19527 0.195262C6.45562 -0.0650874 6.87773 -0.0650874 7.13808 0.195262C7.39843 0.455612 7.39843 0.877722 7.13808 1.13807L4.47141 3.80474C4.21106 4.06509 3.78895 4.06509 3.5286 3.80474L0.861934 1.13807C0.601584 0.877722 0.601584 0.455612 0.861934 0.195262Z" fill="currentColor"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="div-after-summary">
+                                <div class="summary-template-sub-menu">
+                                    <span>
+                                        <img src="/form.svg" alt="قالب های فرم" width="32" height="32">
+                                    </span>
+                                    <span>قالب های فرم</span>
+                                </div>
+                                <div class="summary-template-sub-menu">
+                                    <span>
+                                        <img src="/card-form.svg" alt="card-from" width="32" height="32">
+                                    </span>
+                                    <span>قالب های کارت فرم</span>
+                                </div>
+                            </div>
+                        </details>
+                    </li>
+                    <li class="topics-menu-down" @click="open_menu_product = !open_menu_product">
+                        <details>
+                            <summary :style="{color:open_menu_product?'#0075e3':''}">
+                                <span>محصولات</span>
+                                <span class="arrow-sub-menu">
+                                    <svg width="16" style="transition: .3s ease;" :style="{transform: open_menu_product?'rotate(180deg)':''}" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 4"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.861934 0.195262C1.12228 -0.0650874 1.54439 -0.0650874 1.80474 0.195262L4 2.39052L6.19527 0.195262C6.45562 -0.0650874 6.87773 -0.0650874 7.13808 0.195262C7.39843 0.455612 7.39843 0.877722 7.13808 1.13807L4.47141 3.80474C4.21106 4.06509 3.78895 4.06509 3.5286 3.80474L0.861934 1.13807C0.601584 0.877722 0.601584 0.455612 0.861934 0.195262Z" fill="currentColor"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="div-after-summary">
+                                <div class="summary-template-sub-menu">
+                                    <span>
+                                        <img src="/form.svg" alt="from creator" width="32" height="32">
+                                    </span>
+                                    <span>فرم ساز</span>
+                                </div>
+                                <div class="summary-template-sub-menu">
+                                    <span>
+                                        <img src="/pdf-editor.svg" alt="pdf editor" width="32" height="32">
+                                    </span>
+                                    <span>پی دی اف ادیتور</span>
+                                    <small class="small-style">(به زودی)</small>
+                                </div>
+                                <div class="summary-template-sub-menu">
+                                    <span>
+                                        <img src="/report-builder.svg" alt="reporter" width="32" height="32">
+                                    </span>
+                                    <span>گزارش ساز</span>
+                                    <small class="small-style">(به زودی)</small>
+                                </div>
+                                <div class="summary-template-sub-menu">
+                                    <span>
+                                        <img src="/approvals.svg" alt="workflow jotform" width="32" height="32">
+                                    </span>
+                                    <span>روند کار جات فرم</span>
+                                    <small class="small-style">(به زودی)</small>
+                                </div>
+                            </div>
+                        </details>
+                    </li>
+                    <li class="topics-menu-down" @click="open_menu_support = !open_menu_support">
+                        <details>
+                            <summary :style="{color:open_menu_support?'#0075e3':''}">
+                                <span>پشتیبانی</span>
+                                <span class="arrow-sub-menu">
+                                    <svg width="16" style="transition: .3s ease;" :style="{transform: open_menu_support?'rotate(180deg)':''}" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 4"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.861934 0.195262C1.12228 -0.0650874 1.54439 -0.0650874 1.80474 0.195262L4 2.39052L6.19527 0.195262C6.45562 -0.0650874 6.87773 -0.0650874 7.13808 0.195262C7.39843 0.455612 7.39843 0.877722 7.13808 1.13807L4.47141 3.80474C4.21106 4.06509 3.78895 4.06509 3.5286 3.80474L0.861934 1.13807C0.601584 0.877722 0.601584 0.455612 0.861934 0.195262Z" fill="currentColor"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="div-after-summary">
+                                <div class="summary-template-sub-menu">ارتباط با ما</div>
+                                <div class="summary-template-sub-menu">سوالات متداول</div>
+                                <div class="summary-template-sub-menu">دستورالعمل کاربر</div>
+                                <div class="summary-template-sub-menu">وبلاگ</div>
+                            </div>
+                        </details>
+                    </li>
+                </ul>
+                <ul class="signUp-login-resp" style="margin: 40px 0 0;">
+                    <li>
+                        <button class="login-resp" @click="Login_on = true , SignUp_on = false">ورود</button>
+                    </li>
+                    <li>
+                        <signUp class="signUp-resp" @click="SignUp_on = true , Login_on = false " />
+                    </li>
+                </ul>
+            </div>
+            <div class="signUp_in_responsive" v-if="SignUp_on || user_store.open_SignUp">
+                <div style="padding: 15px 15px 0 15px;">
+                    <button class="close-add-label" @click="SignUp_on = false, user_store.open_SignUp= false , SignUp_on = false , user_store.open_SignUp= false, accept_email = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" fill="#B0BEC5" viewBox="0 0 24 24" ><path fill-rule="evenodd" d="M17.707 7.707a1 1 0 0 0-1.414-1.414L12 10.586 7.707 6.293a1 1 0 0 0-1.414 1.414L10.586 12l-4.293 4.293a1 1 0 1 0 1.414 1.414L12 13.414l4.293 4.293a1 1 0 0 0 1.414-1.414L13.414 12l4.293-4.293Z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                <div class="new-responsive-signUp">
+                    <h2>الان ثبت نام کن</h2>
+                    <p>اطلاعات، پرداخت‌ها و امضاها را با فرم‌های آنلاین سفارشی جمع‌آوری کن.</p>
+                    <p id="signUp-p" v-if="!accept_email">ثبت نام با</p>
+                    <div class="signUp-with" v-if="!accept_email">
+                        <button>
+                            <span><svg fill="none" width="32" xmlns="http://www.w3.org/2000/svg" viewBox="2 1 32 32"><circle cx="18.5" cy="18" r="18" fill="white"></circle><path d="M30.8759 18.2751C30.8759 17.2576 30.7916 16.5151 30.6093 15.7451H18.7534V20.3376H25.7125C25.5723 21.4789 24.8146 23.1976 23.1309 24.3525L23.1073 24.5063L26.8559 27.3522L27.1156 27.3776C29.5008 25.2188 30.8759 22.0426 30.8759 18.2751Z" fill="#4285F4"></path><path d="M18.7518 30.3758C22.1612 30.3758 25.0234 29.2758 27.114 27.3783L23.1293 24.3532C22.063 25.082 20.6318 25.5907 18.7518 25.5907C15.4125 25.5907 12.5784 23.432 11.5681 20.4482L11.42 20.4606L7.52217 23.4169L7.47119 23.5557C9.54769 27.5982 13.813 30.3758 18.7518 30.3758Z" fill="#34A853"></path><path d="M11.5695 20.4475C11.303 19.6775 11.1487 18.8525 11.1487 18C11.1487 17.1475 11.303 16.3225 11.5555 15.5525L11.5485 15.3885L7.60177 12.3848L7.47264 12.445C6.61681 14.1225 6.12573 16.0063 6.12573 18C6.12573 19.9938 6.61681 21.8774 7.47264 23.555L11.5695 20.4475Z" fill="#FBBC05"></path><path d="M18.7519 10.4109C21.123 10.4109 22.7225 11.4147 23.6345 12.2535L27.1983 8.84348C25.0095 6.84973 22.1612 5.62598 18.7519 5.62598C13.813 5.62598 9.5477 8.40346 7.47119 12.4459L11.5541 15.5535C12.5784 12.5697 15.4126 10.4109 18.7519 10.4109Z" fill="#EB4335"></path></svg></span>
+                            <span>گوگل</span>
+                        </button>
+                        <button>
+                            <span><svg width="32" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="2 1 32 32"><rect x="19.8198" y="19.125" width="11.25" height="11.25" fill="#FEBA08"></rect><rect x="6.31982" y="19.125" width="11.25" height="11.25" fill="#05A6F0"></rect><rect x="19.8198" y="5.625" width="11.25" height="11.25" fill="#80BC06"></rect><rect x="6.31982" y="5.625" width="11.25" height="11.25" fill="#F25325"></rect></svg></span>
+                            <span>مایکروسافت</span>
+                        </button>
+                    </div>
+                    <div class="space" style="margin: 0 140px 12px;" v-if="!accept_email">
+                        <div class="thin"></div>
+                        <span>یا</span>
+                        <div class="thin"></div>
+                    </div>
+                    <div class="signUp-email" v-if="!accept_email" @keyup.enter="get_email()">
+                        <span><label for="email-address" style="text-align: center;">ایمیل</label></span>
+                        <span><input type="text" key="email-address" v-model="user_email" @input="text_error = ''" style="width: 90%;"></span>
+                        <span v-if="text_error" style="color: red; padding: 5px 0;">{{ text_error }}</span>
+                        <span><button class="continue" @click="get_email()" style="width: 90%;">ادامه</button></span>
+                        <div class="login-box">
+                            قبلا ثبت نام کرده اید؟
+                            <button @click="user_store.change_box('Login'), SignUp_on= false,user_email ='',text_error=''">ورود</button>
+                        </div>
+                    </div>
+                    <div class="signUp-username" v-if="accept_email" @keyup.enter="send_new_user(e)">
+                        <div class="item-signUp" style="width: 100%;">
+                            <span style="width: 100%;"><label style="text-align: center;" for="user-name">نام کاربری</label></span>
+                            <span style="width: 100%;"><input  type="text" key="user-name" v-model="New_User.username" @input="text_error = ''" style="width: 90%;"></span>
+                        </div>
+                        <div class="item-signUp" style="width: 100%;">
+                            <span style="width: 100%;"><label style="text-align: center;" for="email-address">ایمیل</label></span>
+                            <span style="width: 100%;"><input type="text" key="email-address" class="input-ltr" v-model="user_email" :disabled="accept_email" @input="text_error = ''" style="width: 90%;"></span>
+                        </div>
+                        <div class="item-signUp" style="width: 100%;">
+                            <span style="width: 100%;"><label style="text-align: center;" for="password">رمز عبور</label></span>
+                            <span style="width: 100%;"><input type="password" key="password" class="input-ltr" v-model="New_User.password" @input="text_error = ''" style="width: 90%;"></span>
+                        </div>
+                        <div class="item-signUp" style="width: 100%;">
+                            <span style="width: 100%;"><label style="text-align: center;" for="password-again">تکرار رمز عبور</label></span>
+                            <span style="width: 100%;"><input type="password" key="password-again" v-model="password_again" class="input-ltr" @input="text_error = ''" style="width: 90%;"></span>
+                            <span v-if="text_error" style="color: red; padding: 5px 0;">{{ text_error }}</span>
+                        </div>
+                        <div class="item-signUp" style="width: 100%; flex-direction: row;">
+                            <button @click="send_new_user(e)" style="width: 90%;">ثبت نام</button>
+                        </div>
+                    </div>
+                </div>
+    </div>
             <nav class="check-item check-item-workspace" style="position: relative;">
                 <logo_without @click="back_home()"/>
-                <div style="display: flex; align-items: center; margin-left: 35px ;" :style="{marginLeft: User_Name? '130px':''}" @click="box_content = !box_content">
+                <div id="none-workspace"  :style="{marginLeft: User_Name? '130px':''}" @click="box_content = !box_content">
                     <span class="page-name">صفحه کار من</span>
                     <span class="arrow-back">
                         <svg style="display: flex;" xmlns="http://www.w3.org/2000/svg" :class="{rotate: box_content}" width="20" height="100%" fill="#fff" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4.293 8.293a1 1 0 0 1 1.414 0L12 14.586l6.293-6.293a1 1 0 1 1 1.414 1.414l-7 7a1 1 0 0 1-1.414 0l-7-7a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"></path>
                         </svg>
                     </span>
                 </div>
-                <button class="signUp-back-withe" v-if="!User_Name">ثبت نام رایگان</button>
+                
+                <button class="signUp-back-withe" @click="SignUp_on= true" v-if="!User_Name && !tuggle">ثبت نام رایگان</button>
                 <div @click="tuggle = !tuggle" :class="{active: tuggle}" class="hamburger-menu hamburger-back">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
+            
             </nav>
             <menu_bar_myWork id="color-bf-menu" class="responsive-workspace-header"/>
         </div>
@@ -2013,6 +2338,10 @@
     cursor: pointer;
     height: 24px;
 }
+#none-workspace{
+    display: flex;
+    align-items: center;
+}
 @media (max-width: 992px) {
     .settingLabelOff {
         position: fixed;
@@ -2038,6 +2367,9 @@
     }
 }
 @media (max-width: 640px) {
+    .signUp-back-withe{
+        margin: 0 45vw 0 0 ;
+    }
     .settingLabelOn{
         position: fixed;
         top: 65px;
@@ -2161,6 +2493,9 @@
     }
     .product-box img{
         width: auto;
+    }
+    #none-workspace{
+        display: none;
     }
 }
 @media (max-width: 360px){

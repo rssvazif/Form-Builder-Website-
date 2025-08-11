@@ -11,7 +11,9 @@ import customize from '../components/features/customize.vue'
 import footer_endPage from '../components/footer_endPage.vue'
 import {onMounted, ref, onUnmounted ,computed} from 'vue'
 import SignUp from '../components/signUp.vue'
+import { useSignUp_LoginStore } from '../../stores/SignUp_LoginStore'
 
+const user_store = useSignUp_LoginStore()
 const Login_on = ref(false)
 const SignUp_on = ref(false)
 const tuggle = ref(false)
@@ -263,9 +265,9 @@ async function send_new_user(e){
             </li>
         </ul>
     </div>
-    <div class="signUp_in_responsive" v-if="Login_on">
+    <div class="signUp_in_responsive" v-if="Login_on || user_store.open_Login">
         <div style="padding: 15px 15px 0 15px;">
-            <button class="close-add-label" @click="Login_on = false">
+            <button class="close-add-label" @click="Login_on = false , user_store.open_Login = false , SignUp_on = false , user_store.open_SignUp= false">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" fill="#B0BEC5" viewBox="0 0 24 24" ><path fill-rule="evenodd" d="M17.707 7.707a1 1 0 0 0-1.414-1.414L12 10.586 7.707 6.293a1 1 0 0 0-1.414 1.414L10.586 12l-4.293 4.293a1 1 0 1 0 1.414 1.414L12 13.414l4.293 4.293a1 1 0 0 0 1.414-1.414L13.414 12l4.293-4.293Z" clip-rule="evenodd"></path></svg>
             </button>
         </div>
@@ -297,14 +299,14 @@ async function send_new_user(e){
                 <span><button class="continue" @click="login_User()">ورود</button></span>
                 <div class="login-box">
                     حساب کاربری ندارید؟
-                    <button @click="user_store.change_box('SignUp'),text_error = ''">ثبت نام</button>
+                    <button @click="user_store.change_box('SignUp'),Login_on = false,text_error = ''">ثبت نام</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="signUp_in_responsive" v-if="SignUp_on">
+    <div class="signUp_in_responsive" v-if="SignUp_on || user_store.open_SignUp">
         <div style="padding: 15px 15px 0 15px;">
-            <button class="close-add-label" @click="SignUp_on = false , accept_email = false">
+            <button class="close-add-label" @click="SignUp_on = false , user_store.open_SignUp = false , accept_email = false , SignUp_on = false , user_store.open_SignUp= false">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" fill="#B0BEC5" viewBox="0 0 24 24" ><path fill-rule="evenodd" d="M17.707 7.707a1 1 0 0 0-1.414-1.414L12 10.586 7.707 6.293a1 1 0 0 0-1.414 1.414L10.586 12l-4.293 4.293a1 1 0 1 0 1.414 1.414L12 13.414l4.293 4.293a1 1 0 0 0 1.414-1.414L13.414 12l4.293-4.293Z" clip-rule="evenodd"></path></svg>
             </button>
         </div>
@@ -334,7 +336,7 @@ async function send_new_user(e){
                 <span><button class="continue" @click="get_email()" style="width: 90%;">ادامه</button></span>
                 <div class="login-box">
                     قبلا ثبت نام کرده اید؟
-                    <button @click="user_store.change_box('Login'),user_email ='',text_error=''">ورود</button>
+                    <button @click="user_store.change_box('Login'), SignUp_on = false , user_email ='',text_error=''">ورود</button>
                 </div>
             </div>
             <div class="signUp-username" v-if="accept_email" @keyup.enter="send_new_user(e)">
@@ -444,6 +446,7 @@ async function send_new_user(e){
     .hidden-menu.active{
         left: 0;
         justify-content:start;
+        z-index: 1000;
     }
     .topics{
         display: flex;

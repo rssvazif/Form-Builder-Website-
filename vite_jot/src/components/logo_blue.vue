@@ -18,7 +18,7 @@
         gap: 0.3em;
     }
     .logo b{
-        width: 100px;
+        width: 100%;
         text-align: center;
     }
 
