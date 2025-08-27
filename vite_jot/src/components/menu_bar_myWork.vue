@@ -76,20 +76,7 @@ function logOut_user(){
     localStorage.removeItem('expiry')
     window.location.href = '/'
 }
-function get_email() {
-  if(!user_email.value) {
-    alert('لطفا ایمیل را وارد کنید');
-    return;
-  }
-  
-  if(!isEmailValid.value) {
-    user_email.value = ''
-    alert('ایمیل نامعتبر است!!');
-    return;
-  }
-  
-  accept_email.value = true;
-}
+
 </script>
 
 <template>
@@ -178,7 +165,7 @@ function get_email() {
         <Login_component v-if="user_store.open_Login"/>
         <SignUp_component v-if="user_store.open_SignUp"/>
         <div class="box-avatar" v-if="avatar_status">
-            <button class="avatar" style="border-radius: 50%;" @click="account_tuggle = !account_tuggle"><img src="/podo_logo.png" alt="user" width="45" height="100%" style="border-radius: 50%;"></button>
+            <button class="avatar" style="border-radius: 50%;" @click="account_tuggle = !account_tuggle"><img src="/podo_logo.png" alt="user" width="45" height="45" style="border-radius: 50%;"></button>
             <div class="account-box" v-if="account_tuggle">
                 <div class="box-hello">
                     <div>

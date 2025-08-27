@@ -39,7 +39,7 @@
         }
     }
     @media (max-width: 992px){
-        img{
+        .customize div img{
             width: 100%;
         }
         p{

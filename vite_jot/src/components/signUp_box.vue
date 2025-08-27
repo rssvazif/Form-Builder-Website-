@@ -1,4 +1,12 @@
+<script setup>
+import { useSignUp_LoginStore } from '../../stores/SignUp_LoginStore'
+import SignUp from '../components/SignUP_comp.vue'
+
+const user_store = useSignUp_LoginStore()
+
+</script>
 <template>
+    <SignUp v-if="user_store.box"/>
     <div class="box">
         <div class="signUp-itmes">
             <div class="google">
@@ -20,9 +28,12 @@
             </div>
             
 
-            <router-link to="/signUp" class="email">
-                    <span id="id-email">ثبت نام با ایمیل</span>
+            <router-link to="#" class="email" @click="user_store.box = true">
+                <span id="id-email">ثبت نام با ایمیل</span>
             </router-link>
+                
+            
+            
             <div class="free">
                 <p>رایگان !</p>
             </div>

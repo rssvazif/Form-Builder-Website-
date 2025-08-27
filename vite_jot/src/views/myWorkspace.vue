@@ -61,14 +61,18 @@
     const box_content = ref(false)
     const tuggle = ref(false)
     const windowWidth = ref(window.innerWidth)
-    
+    const user_logined = ref(false)
     function windowControler(){
         windowWidth.value = window.innerWidth
         if(windowWidth.value >= 992){
             tuggle.value = false
         }
     }
-
+    function logOut_user(){
+        localStorage.removeItem('token')
+        localStorage.removeItem('expiry')
+        window.location.href = '/'
+    }
     function tuggle_page(){
         type_page.value = !type_page.value;
     }
@@ -126,6 +130,7 @@
             console.log('token is not valid');
             return
         }
+        user_logined.value = true
         const now = Date.now()
         if(now > expiresTime){
             localStorage.removeItem('token')
@@ -504,6 +509,7 @@ function get_email() {
             const expiryTime = Date.now() + expiresIn;
             localStorage.setItem('expiry',expiryTime.toString())
             localStorage.setItem('token',data.token)
+            user_logined.value = true
 
             window.location.href = '/myWorkspace'
             accept_email.value = false
@@ -552,6 +558,7 @@ async function login_User(){
         const expiryTime = Date.now() + expiresIn;
         localStorage.setItem('expiry',expiryTime.toString())
         localStorage.setItem('token',data.token)
+        user_logined.value = true
         window.location.href = '/myWorkspace'
 
     }catch(error){
@@ -744,13 +751,33 @@ async function login_User(){
                         </details>
                     </li>
                 </ul>
-                <ul class="signUp-login-resp" style="margin: 40px 0 0;">
+                <ul v-if="!user_logined" class="signUp-login-resp" style="margin: 40px 0 0;">
                     <li>
                         <button class="login-resp" @click="Login_on = true , SignUp_on = false">ورود</button>
                     </li>
                     <li>
                         <signUp class="signUp-resp" @click="SignUp_on = true , Login_on = false " />
                     </li>
+                </ul>
+                <ul class="after-login-resp" v-else>
+                    <div class="box-hello">
+                        <div>
+                            <button class="avatar" style="border-radius: 50%;" @click="account_tuggle = !account_tuggle"><img src="/podo_logo.png" alt="user" width="45" height="100%" style="border-radius: 50%;"></button>
+                        </div>
+                        <div class="hello-username">
+                            <span>سلام،</span>
+                            <span>{{ User_Name }}</span>
+                        </div>
+                        <div class="status-user">
+                            معتبر
+                        </div>
+                    </div>
+                    <div class="user-bar">
+                        <button>تنظیمات</button>
+                    </div>
+                    <div class="user-bar" @click="logOut_user()">
+                        <button>خروج از حساب</button>
+                    </div>
                 </ul>
             </div>
             <div class="signUp_in_responsive" v-if="SignUp_on || user_store.open_SignUp">
@@ -833,7 +860,8 @@ async function login_User(){
             <menu_bar_myWork id="color-bf-menu" class="responsive-workspace-header"/>
         </div>
     </div>
-    <div class="create-tool-box" :style="{justifyContent:selected_form?'right':''}">
+    <div :style="{position:open_menu?'fixed':''}">
+        <div class="create-tool-box" :style="{justifyContent:selected_form?'right':''}">
         <div class="button-box">
             <button class="create-box" @click="active_products = true,check_user_status()">
                 <span>+</span>
@@ -1288,6 +1316,9 @@ async function login_User(){
     <div class="footer-others">
         <footer_page/>
     </div>
+
+    </div>
+    
 </template>
 
 <style setup>
@@ -2111,6 +2142,7 @@ async function login_User(){
     padding: 0 10px;
     width: 100%;
     border-bottom: 1px solid #a6abc6;
+    height: 16vw;
 }
 .delete-form-tool-box button{
     display: flex;
@@ -2342,6 +2374,12 @@ async function login_User(){
     display: flex;
     align-items: center;
 }
+.signUp_in_responsive{
+    display: none;
+}
+.after-login-resp{
+    width: 100%;
+}
 @media (max-width: 992px) {
     .settingLabelOff {
         position: fixed;
@@ -2433,6 +2471,7 @@ async function login_User(){
     }
     .forms{
         padding: 18px 0;
+        min-height: 80vw;
     }
     .up-input-form-name{
         display: none;
@@ -2496,6 +2535,15 @@ async function login_User(){
     }
     #none-workspace{
         display: none;
+    }
+    .signUp_in_responsive{
+        display: block;
+    }
+    .sideBar{
+        max-height: none;
+    }
+    .box-hello{
+        padding: 0 16px;
     }
 }
 @media (max-width: 360px){

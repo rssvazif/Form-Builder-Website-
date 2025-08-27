@@ -106,7 +106,7 @@ const user_store = useSignUp_LoginStore()
             <button class="signUp" @click="user_store.open_SignUp = true , user_store.open_Login = false"><span>ثبت نام رایگان</span></button>
         </div>
         <Login_component v-if="user_store.open_Login"/>
-        <SignUp_component v-if="user_store.open_SignUp"/>
+        <SignUp_component v-if="user_store.open_SignUp || signUp_from_box"/>
 
     </div>
 
