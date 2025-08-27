@@ -1,14 +1,17 @@
 {
-  "name": "backend",
+  "name": "JotformServer",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "jotform",
+    "form builder",
+    "website"],
+  "author": "Reza Vazifeh Doust",
+  "license": "MIT",
+  "description": "this module is for jotform server",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
