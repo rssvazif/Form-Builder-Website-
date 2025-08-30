@@ -35,7 +35,6 @@
     @media (max-width: 1200px){
         .customize{
             width: 100%;
-            padding: 2.5em 0;
         }
     }
     @media (max-width: 992px){

@@ -1,6 +1,6 @@
 <template>
     <div class="integration">
-        <div>
+        <div style="display: flex; justify-content: center;">
             <img src="/integrations-2.svg" alt="integration-jot">
         </div>
         <div>
@@ -24,7 +24,9 @@
     @media (max-width: 1200px){
     .integration{
         width: 100%;
-        padding: 2.5em 0;
+    }
+    .integration div img{
+        width: 100%;
     }
     }
 </style>

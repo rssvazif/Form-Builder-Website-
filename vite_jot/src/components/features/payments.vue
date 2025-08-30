@@ -1,6 +1,6 @@
 <template>
     <div class="payment">
-        <div>
+        <div style="display: flex; justify-content: center;">
             <img src="/payments-2.svg" alt="payment-jot">
         </div>
         <div>
@@ -23,7 +23,9 @@
     @media (max-width: 1200px){
         .payment{
             width: 100%;
-            padding: 2.5em 0;
+        }
+        .payment div img{
+            width: 100%;
         }
     }
 </style>

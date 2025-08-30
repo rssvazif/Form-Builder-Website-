@@ -397,7 +397,7 @@ async function send_new_user(e){
 
     <section class="bottom-signUp container">
         <h4 class="sentence-style">آماده شروع هستید؟</h4>
-        <p id="pragh" class="sentence-style">اولین فرم خودتو بساز تا ببینی برای چی جامعه بزرگی به جات فرم اعتماد دارن.</p>
+        <p id="pragh" class="sentence-style">اولین فرم خودتو بساز تا ببینی چرا جامعه بزرگی به جات فرم اعتماد دارن.</p>
         <signUp_box class="control-signUp-box"/>
     </section>
 
@@ -618,6 +618,7 @@ async function send_new_user(e){
     .bottom-signUp #pragh{
         font-size: 1.4em;
         color: var(--jfv-withe-dark);
+        margin: 0 0 1.5em;
     }
     .control-signUp-box{
         margin: 2.5em 32em;
@@ -744,6 +745,9 @@ async function send_new_user(e){
         .control-signUp-box{
             margin: 20px 0 30px 0;
             width: 317px;
+        }
+        .pic-and-signUp{
+            justify-content: center;
         }
     }
 

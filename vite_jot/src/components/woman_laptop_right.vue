@@ -63,6 +63,11 @@
                 </linearGradient>
             </defs>
         </svg>
+        <div class="tick-green-style-home">
+            <svg viewBox="-3 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.89163 13.2687L9.16582 17.5427L18.7085 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
     </div>
 </template>
 
@@ -77,6 +82,18 @@
         min-height: 350px;
         z-index: 1;
     }
+    .tick-green-style-home{
+        border-radius: 50%;
+        width: 60px;
+        background-color: rgb(80, 181, 25);
+        display: flex; 
+        justify-content: center;
+        height: 60px; 
+        position: absolute; 
+        top: 115px;
+        right: 240px; 
+        border: 2px solid white;
+    }
     .back-woman-right{
         position: absolute;
         max-height: 150px;
@@ -89,5 +106,9 @@
         background-color:var(--jfv-yellow-400);
         z-index: 0;
     }
-    
+    @media (max-width:992px){
+        .tick-green-style-home{
+            display: none;
+        }
+    }
 </style>

@@ -2142,7 +2142,6 @@ async function login_User(){
     padding: 0 10px;
     width: 100%;
     border-bottom: 1px solid #a6abc6;
-    height: 16vw;
 }
 .delete-form-tool-box button{
     display: flex;
