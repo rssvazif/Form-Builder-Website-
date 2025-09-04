@@ -1301,7 +1301,10 @@ async function login_User(){
                         </span>
                         <div class="name-date" style="margin: 0; width: 90%;">
                             <span>{{ form.title }}</span>
-                            <span> ساخته شده در {{ new Date(form.createdAt).toLocaleDateString('fa-IR')}}</span>
+                            <div style="justify-content: right;">
+                                <span> ساخته شده در {{ new Date(form.createdAt).toLocaleDateString('fa-IR')}}</span>
+                                <span class="submission-count-style">{{ 0 }} ارسال</span>
+                            </div>
                         </div>
                         <div class="Edit-form" v-if="index_edit === index || selected_form && selected_id === index" @click="go_to_EditForm(form._id)">
                             <button>
@@ -2100,7 +2103,7 @@ async function login_User(){
     font-size: 18px;
     color: var(--jfv-google-apple-blue);
 }
-.name-date span:nth-child(2){
+.name-date div span:nth-child(1){
     font-size: 12px;
     color: #6f76a7;
     margin: 2px 0 0;
@@ -2378,6 +2381,10 @@ async function login_User(){
 }
 .after-login-resp{
     width: 100%;
+}
+.submission-count-style{
+    font-size: inherit;
+    color: #6f76a7;
 }
 @media (max-width: 992px) {
     .settingLabelOff {

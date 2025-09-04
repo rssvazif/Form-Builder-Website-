@@ -52,6 +52,10 @@ const change_type_input = ref(false)
 const protection_password = ref('')
 const open_setting = ref(false)
 const change_status = ref(false)
+const showSettingPublish = ref(false)
+const accessSetting = ref('public')
+const openToInvite = ref(false)
+const emailPermissionCompany = ref('')
 const status = ref([
     'فعال','غیرفعال','غیرفعال در محدودیت ارسال'
 ])
@@ -222,6 +226,15 @@ function ondrop(event){
     Form_store.addFields(data,Ind)
 }
 
+function handleAccessSetting(){
+    if(accessSetting.value === 'company' && emailPermissionCompany.value === ''){
+        accessSetting.value = 'public'
+        return
+    }
+    if(emailPermissionCompany.value && accessSetting.value !== 'company'){
+        emailPermissionCompany.value = ''
+    }
+}
 function save_index(event,index){
     location_index.value = index
 }
@@ -535,11 +548,181 @@ watch(() => Form_store.fields, () => {
                 </form>
             </div>
         </div>
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 589px; background-color: #f3f3fe;" v-if="display_section === 'انتشار'">
-            <p style="margin: 200px 0;">به زودی . . .</p>
+        <div class="publish-form" v-if="display_section === 'انتشار'">
+        <div class="no-access-page" v-if="showSettingPublish">
+            <div class="setting-link-address-box">
+                <div class="head-of-setting-link">
+                    <span>تنظیمات</span>
+                    <button class="close-add-label" @click="showSettingPublish = false , handleAccessSetting()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M17.707 7.707a1 1 0 0 0-1.414-1.414L12 10.586 7.707 6.293a1 1 0 0 0-1.414 1.414L10.586 12l-4.293 4.293a1 1 0 1 0 1.414 1.414L12 13.414l4.293 4.293a1 1 0 0 0 1.414-1.414L13.414 12l4.293-4.293Z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                <div class="access-settings-form">
+                    <div>
+                        <div>سطح دسترسی</div>
+                        <ul style="padding: 12px 0 0;">
+                            <li :class="{active_private:accessSetting === 'private'}" class="each-access-mode-style" @click="accessSetting = 'private'">
+                                <div>
+                                    <svg :class="{active_private:accessSetting === 'private'}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="24" height="24" style="margin: 0px 14px;"><path fill-rule="evenodd" d="M9.5 7.5a2.5 2.5 0 0 1 5 0V10h-5V7.5Zm-3 2.5V7.5a5.5 5.5 0 1 1 11 0V10h.5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h.5Z" clip-rule="evenodd"></path></svg>
+                                </div>
+                                <div class="two-comment-access">
+                                    <span>فرم خصوصی</span>
+                                    <span>فقط برای افراد دعوت شده دردسترس است</span>
+                                </div>
+                                <div class="tick-selected-access-mode" v-if="accessSetting === 'private'">
+                                    <svg width="25" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 23c6.075 0 11-4.925 11-11S18.075 1 12 1 1 5.925 1 12s4.925 11 11 11Zm5.707-13.293a1 1 0 0 0-1.414-1.414L11 13.586l-2.293-2.293a1 1 0 0 0-1.414 1.414l3 3a1 1 0 0 0 1.414 0l6-6Z" clip-rule="evenodd"></path></svg>
+                                </div>
+                            </li>
+                            <li :class="{active_public:accessSetting === 'public'}" class="each-access-mode-style" @click="accessSetting = 'public'">
+                                <div>
+                                    <svg :class="{active_public:accessSetting === 'public'}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="24" height="24" style="margin: 0px 14px;"><path fill-rule="evenodd" d="M9.5 7.5A2.5 2.5 0 0 1 12 5h.5a2 2 0 0 1 1.861 1.267c.152.386.475.733.889.733 1.243 0 2.295-1.057 1.753-2.175A5 5 0 0 0 12.5 2H12a5.5 5.5 0 0 0-5.5 5.5V10H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2H9.5V7.5Z" clip-rule="evenodd"></path></svg>
+                                </div>
+                                <div class="two-comment-access">
+                                    <span>فرم عمومی</span>
+                                    <span>برای همه دردسترس است</span>
+                                </div>
+                                <div class="tick-selected-access-mode" v-if="accessSetting === 'public'"> 
+                                    <svg width="25" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 23c6.075 0 11-4.925 11-11S18.075 1 12 1 1 5.925 1 12s4.925 11 11 11Zm5.707-13.293a1 1 0 0 0-1.414-1.414L11 13.586l-2.293-2.293a1 1 0 0 0-1.414 1.414l3 3a1 1 0 0 0 1.414 0l6-6Z" clip-rule="evenodd"></path></svg>
+                                </div>
+                            </li>
+                            <li :class="{active_company: accessSetting === 'company'}" class="each-access-mode-style" @click="accessSetting = 'company'">
+                                <div>
+                                    <svg :class="{active_company:accessSetting === 'company'}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="24" height="24" style="margin: 0px 14px;"><path fill-rule="evenodd" d="M6 3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1h1a3 3 0 0 1 3 3v4h1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1 3 3 0 0 1 3 3v7a1 1 0 1 1 0 2H2a1 1 0 1 1 0-2V6a3 3 0 0 1 3-3h1Zm7 8v9h-2.5v-3a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3H4V6a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v5Zm7 2v7h-1v-1.5a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1V20h-1v-8h4a1 1 0 0 1 1 1ZM5.5 9a1 1 0 1 0 2 0V8a1 1 0 0 0-2 0v1Zm5 1a1 1 0 0 1-1-1V8a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm6 5a1 1 0 1 0 2 0v-1a1 1 0 1 0-2 0v1Zm-6-1a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-5-1a1 1 0 1 0 2 0v-1a1 1 0 1 0-2 0v1Z" clip-rule="evenodd"></path></svg>
+                                </div>
+                                <div class="two-comment-access">
+                                    <span>دسترسی شرکت</span>
+                                    <span>فقط برای اعضا ارگان شما دردسترس است</span>
+                                </div>
+                                <div class="tick-selected-access-mode" v-if="accessSetting === 'company'">
+                                    <svg width="25" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 23c6.075 0 11-4.925 11-11S18.075 1 12 1 1 5.925 1 12s4.925 11 11 11Zm5.707-13.293a1 1 0 0 0-1.414-1.414L11 13.586l-2.293-2.293a1 1 0 0 0-1.414 1.414l3 3a1 1 0 0 0 1.414 0l6-6Z" clip-rule="evenodd"></path></svg>
+                                </div>
+                            </li>
+                            <div style="height: 10px;" class="line-in-link-publish" v-if="accessSetting"></div>
+                            <li style="padding: 10px 0;" v-if="accessSetting === 'company'">
+                                <div>سطح دسترسی شرکت</div>
+                                <div class="company-permission">
+                                    <span>نیاز به دامنه ایمیل سازمانی</span>
+                                    <span class="email-permission">
+                                        <input type="email" placeholder="example.com" v-model="emailPermissionCompany">
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="publish-container">
+                <div class="direct-link-header">
+                    <div style="width: fit-content;">
+                        <span class="svg-direct-link-span">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 24 24" width="24px"><path fill-rule="evenodd" d="M17.959 6.04a3.714 3.714 0 0 1 0 5.253l-1.334 1.334a1 1 0 0 0 1.415 1.414l1.333-1.334a5.714 5.714 0 1 0-8.08-8.08L9.958 5.96a1 1 0 1 0 1.414 1.414l1.333-1.333a3.714 3.714 0 0 1 5.253 0Zm-10 10a1 1 0 0 1 0-1.414l6.667-6.667a1 1 0 1 1 1.414 1.414L9.374 16.04a1 1 0 0 1-1.415 0ZM6.04 12.707a3.714 3.714 0 0 0 5.252 5.252l1.334-1.333a1 1 0 1 1 1.414 1.414l-1.333 1.333a5.714 5.714 0 1 1-8.081-8.08l1.333-1.334a1 1 0 1 1 1.414 1.414L6.04 12.707Z" clip-rule="evenodd"></path></svg>
+                        </span>
+                    </div>
+                    <div class="title-in-direct-link">
+                        <h2>لینک مستقیم از فرم شما</h2>
+                        <span>فرم شما به شکل امن برای اشتراک گذاری و استفاده از طریق لینک زیر دردسترس است</span>
+                    </div>
+                </div>
+                <div class="each-box-in-publish">
+                    <div class="inside-each-box-in-publish">
+                        <div class="each-box-in-publish-head" v-if="!openToInvite">
+                            <h2>اشراک گذاری با آدرس</h2>
+                            <div @click="showSettingPublish = true">
+                                <div v-if="accessSetting === 'private'" class="private-access-style">
+                                    <span>
+                                        <svg style="display: flex; justify-content: center;" width="14" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M9.5 7.5a2.5 2.5 0 0 1 5 0V10h-5V7.5Zm-3 2.5V7.5a5.5 5.5 0 1 1 11 0V10h.5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h.5Z" clip-rule="evenodd"></path></svg>
+                                    </span>
+                                    <span>فرم خصوصی</span>
+                                </div>
+                                <div v-else-if="accessSetting === 'company'" class="company-access-style">
+                                    <span>
+                                        <svg style="display: flex; justify-content: center;" width="14" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M6 3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1h1a3 3 0 0 1 3 3v4h1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1 3 3 0 0 1 3 3v7a1 1 0 1 1 0 2H2a1 1 0 1 1 0-2V6a3 3 0 0 1 3-3h1Zm7 8v9h-2.5v-3a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3H4V6a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v5Zm7 2v7h-1v-1.5a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1V20h-1v-8h4a1 1 0 0 1 1 1ZM5.5 9a1 1 0 1 0 2 0V8a1 1 0 0 0-2 0v1Zm5 1a1 1 0 0 1-1-1V8a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm6 5a1 1 0 1 0 2 0v-1a1 1 0 1 0-2 0v1Zm-6-1a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm-5-1a1 1 0 1 0 2 0v-1a1 1 0 1 0-2 0v1Z" clip-rule="evenodd"></path></svg>
+                                    </span>
+                                    <span>دسترسی شرکت</span>
+                                </div>
+                                <div v-else class="public-access-style">
+                                    <span>
+                                        <svg style="display: flex; justify-content: center;" width="14" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M9.5 7.5A2.5 2.5 0 0 1 12 5h.5a2 2 0 0 1 1.861 1.267c.152.386.475.733.889.733 1.243 0 2.295-1.057 1.753-2.175A5 5 0 0 0 12.5 2H12a5.5 5.5 0 0 0-5.5 5.5V10H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2H9.5V7.5Z" clip-rule="evenodd"></path></svg>
+                                    </span>
+                                    <span>فرم عمومی</span>
+                                </div>
+                            </div>
+                            <button class="setting-in-publish-head" @click="showSettingPublish = true">
+                                <span>
+                                    <svg style="display: flex;justify-content: center;align-items: center;" width="16.5" xmlns="http://www.w3.org/2000/svg" fill="#4573E3" viewBox="0 0 24 24"><path d="M21.81 10.328a2.75 2.75 0 0 1-1.69-4.082c.442-.737.309-1.373-.13-1.81l-.426-.426c-.437-.437-1.073-.57-1.81-.13a2.75 2.75 0 0 1-4.082-1.69C13.464 1.354 12.92 1 12.302 1h-.603c-.619 0-1.162.355-1.371 1.19a2.75 2.75 0 0 1-4.082 1.69c-.737-.442-1.374-.309-1.811.128l-.426.427c-.438.437-.571 1.074-.128 1.81a2.75 2.75 0 0 1-1.692 4.083c-.832.208-1.189.75-1.189 1.37v.603c0 .619.355 1.162 1.19 1.371a2.75 2.75 0 0 1 1.69 4.082c-.442.737-.309 1.373.13 1.81l.426.426c.439.439 1.075.57 1.81.13a2.749 2.749 0 0 1 4.082 1.69c.208.835.752 1.19 1.37 1.19h.603c.619 0 1.162-.355 1.371-1.19a2.75 2.75 0 0 1 4.082-1.69c.736.44 1.371.309 1.81-.13l.426-.426c.437-.437.57-1.073.13-1.81a2.749 2.749 0 0 1 1.69-4.082c.835-.208 1.19-.752 1.19-1.37v-.603c0-.62-.358-1.163-1.19-1.371ZM12 16.125a4.125 4.125 0 1 1 0-8.25 4.125 4.125 0 0 1 0 8.25Z"></path></svg>
+                                </span>
+                                <span>تنظیمات</span>
+                            </button>
+                        </div>
+                        <div class="linkBox" v-if="!openToInvite">
+                            <button class="edit-link-button">
+                                <svg width="18px" style="display: flex; justify-content: center; align-items: center;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M18.715 2.586a2 2 0 0 0-2.829 0L3.782 14.69a2 2 0 0 0-.499.83l-1.189 3.888c-.468 1.532.966 2.966 2.498 2.497l3.888-1.19a2 2 0 0 0 .829-.498L21.414 8.113a2 2 0 0 0 0-2.828l-2.7-2.7Zm-2.909 2.908L17.301 4l2.698 2.699-1.494 1.494-2.699-2.699Z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            <div class="link">
+                                http://localhost:form/23423524
+                            </div>
+                            <div style="display: flex;margin: 0 10px;">
+                                <svg width="20" style="display: flex; justify-content: center;align-items: center;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M17.959 6.04a3.714 3.714 0 0 1 0 5.253l-1.334 1.334a1 1 0 0 0 1.415 1.414l1.333-1.334a5.714 5.714 0 1 0-8.08-8.08L9.958 5.96a1 1 0 1 0 1.414 1.414l1.333-1.333a3.714 3.714 0 0 1 5.253 0Zm-10 10a1 1 0 0 1 0-1.414l6.667-6.667a1 1 0 1 1 1.414 1.414L9.374 16.04a1 1 0 0 1-1.415 0ZM6.04 12.707a3.714 3.714 0 0 0 5.252 5.252l1.334-1.333a1 1 0 1 1 1.414 1.414l-1.333 1.333a5.714 5.714 0 1 1-8.081-8.08l1.333-1.334a1 1 0 1 1 1.414 1.414L6.04 12.707Z" clip-rule="evenodd"></path></svg>
+                            </div>
+                        </div>
+                        <div class="button-in-publish-container" v-if="!openToInvite">
+                            <router-link to="/form/2423542" target="_blank">نمایش در صفحه دیگر</router-link>
+                            <button>کپی آدرس</button>
+                        </div>
+                        <div class="line-in-link-publish" v-if="!openToInvite"></div>
+                        <div>
+                            <div class="invite-with-email">
+                                <h2>دعوت با ایمیل</h2>
+                                <span>
+                                    <svg width="16" style="display: flex;justify-content: center;align-items: center;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M17.707 8.707a1 1 0 0 1-1.414 0L13 5.414V15a1 1 0 0 1-2 0V5.414L7.707 8.707a1 1 0 0 1-1.414-1.414l5-5a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1 0 1.414ZM4 16a1 1 0 1 0-2 0v3a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-3a1 1 0 1 0-2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3Z" clip-rule="evenodd"></path></svg>
+                                </span>
+                            </div>
+                            <div class="email-address-box-to-invite" @click="openToInvite = true">
+                                <span>
+                                    <svg width="20" style="display: flex;justify-content: center;align-items: center;margin: 11px;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M1 7.52V18a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V7.52l-9.28 6.496a3 3 0 0 1-3.44 0L1 7.521Zm21.881-2.358A3.001 3.001 0 0 0 20 3H4a3.001 3.001 0 0 0-2.881 2.162l10.308 7.216a1 1 0 0 0 1.146 0l10.308-7.216Z" clip-rule="evenodd"></path></svg>
+                                </span>
+                                <span>به:</span>
+                                <div class="input-box-to-email-invite">
+                                    <input type="email" placeholder="آدرس ایمیل را برای دعوت وارد کنید">
+                                </div> 
+                            </div>
+                            <div v-if="openToInvite" class="invitation-message">
+                                <textarea maxlength="100" placeholder="متن دعوت را وارد کنید (اختیاری)"></textarea>
+                            </div>
+                            <div v-if="openToInvite" class="button-to-invitation">
+                                <button @click="openToInvite = false">لغو</button>
+                                <button>ارسال دعوت</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="direct-link-header" style="margin: 30px 0 0;">
+                    <div class="pdf-svg-publish">
+                        <svg style="display: flex;justify-content: center;align-items: center;" xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 24 24" width="24px"><path fill-rule="evenodd" d="M3 20V4a3 3 0 0 1 3-3h7.756a2 2 0 0 1 1.425.596l5.243 5.32A2 2 0 0 1 21 8.32V20a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3ZM15 6V3l4 4h-3a1 1 0 0 1-1-1Zm-8.874 8.152v1.744c0 .037.024.061.072.072.181.021.325.032.432.032.384 0 .68-.088.888-.264.213-.181.32-.432.32-.752 0-.635-.403-.952-1.208-.952-.133 0-.28.013-.44.04-.043.01-.064.037-.064.08Zm-.88 4.768a.438.438 0 0 1-.32-.136.438.438 0 0 1-.136-.32v-4.888a.52.52 0 0 1 .128-.344.454.454 0 0 1 .32-.168A14 14 0 0 1 6.55 13c1.707 0 2.56.635 2.56 1.904 0 .688-.2 1.21-.6 1.568-.395.352-.976.528-1.744.528-.203 0-.392-.008-.568-.024-.048 0-.072.021-.072.064v1.424c0 .123-.045.23-.136.32a.438.438 0 0 1-.32.136h-.424Zm6.016-1.104c0 .048.021.077.064.088.107.021.235.032.384.032 1.13 0 1.696-.672 1.696-2.016 0-1.237-.565-1.856-1.696-1.856-.15 0-.277.01-.384.032-.043.01-.064.04-.064.088v3.632Zm-.88 1.12a.495.495 0 0 1-.328-.16.53.53 0 0 1-.128-.352v-4.848a.5.5 0 0 1 .128-.344c.09-.101.2-.157.328-.168A11.9 11.9 0 0 1 11.606 13c.981 0 1.741.259 2.28.776.544.512.816 1.227.816 2.144 0 .981-.272 1.741-.816 2.28-.539.533-1.299.8-2.28.8-.4 0-.808-.021-1.224-.064Zm5.312-.152c.09.09.197.136.32.136h.456a.412.412 0 0 0 .312-.136.438.438 0 0 0 .136-.32V16.6c0-.048.024-.072.072-.072h1.608a.452.452 0 0 0 .456-.448v-.128a.412.412 0 0 0-.136-.312.438.438 0 0 0-.32-.136H16.99c-.048 0-.072-.024-.072-.072V14.24c0-.043.024-.064.072-.064h1.768c.123 0 .23-.045.32-.136a.438.438 0 0 0 .136-.32v-.184a.438.438 0 0 0-.136-.32.438.438 0 0 0-.32-.136h-2.744a.438.438 0 0 0-.32.136.438.438 0 0 0-.136.32v4.928c0 .123.045.23.136.32Z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <div class="title-in-direct-link">
+                        <h2>پی دی اف</h2>
+                        <span>دانلود فایل به شکل پی دی اف</span>
+                    </div>
+                </div>
+                <div class="each-box-in-publish">
+                    <div class="inside-each-box-in-publish inside-pdf-box">
+                        <div class="head-pdf-download">
+                            <h2>دانلود فایل</h2>
+                            <span>دانلود فرم در قالب پی دی اف</span>
+                        </div>
+                        <button>
+                            <span>
+                                <svg style="display: flex;justify-content: center;align-items: center;" width="20" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M13 3a1 1 0 1 0-2 0v11.586l-4.293-4.293a1 1 0 1 0-1.414 1.414l6 6a1 1 0 0 0 1.414 0l6-6a1 1 0 0 0-1.414-1.414L13 14.586V3ZM2 21a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z" clip-rule="evenodd"></path></svg>
+                            </span>
+                            <span>دانلود</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class=""></div>
 </template>
 
 
@@ -1238,6 +1421,402 @@ hr{
 }
 .logo-responsive-build{
     display: none;
+}
+.publish-form{
+    display: flex;
+    justify-content: center;
+    padding: 4em .5em 2em;
+    background-color: #f3f3fe;
+    height: 100vw;
+    width: 100vw;
+    max-height: 50vw;
+}
+.publish-container{
+    width: 660px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.direct-link-header{
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+}
+.svg-direct-link-span{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #58b966;
+    border-radius: 4px;
+    width: 40px;
+    height: 40px;
+}
+.title-in-direct-link{
+    margin-right: 12px;
+}
+.title-in-direct-link h2{   
+    margin: 0;
+    font-size: 16px;
+    color:var(--jfv-google-apple-blue);
+}
+.title-in-direct-link span{
+    font-size: 14px;
+    color: #6f76a7;
+}
+.each-box-in-publish{
+    width: 100%;
+    color: #2c3345;
+    background-color: #fff;
+    border: 1px solid #c8ceed;
+    border-radius: 4px;
+    align-items: center;
+    margin-top: 1.5em;
+    padding: 1.25em 1.5em;
+    font-size: 16px;
+    line-height: 1.25;
+    display: flex;
+}
+.inside-each-box-in-publish{
+    width: 100%;
+}
+.each-box-in-publish-head{
+    display: flex;
+    align-items: center;
+}
+.each-box-in-publish-head h2{
+    display: inline-block;
+    color: rgb(10, 21, 81);
+    font-size: inherit;
+    font-weight: 500;
+    margin: 0px 11px 0px 0px;
+    line-height: 24px;
+}
+.each-box-in-publish-head div div{
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    flex: 0 0 auto;
+    height: 32px;
+    border-radius: 2.5rem;
+    padding: 0px 12px;
+    cursor: pointer;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    margin-right: 0.625rem;
+    -webkit-box-pack: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+.public-access-style{
+    border: 1px solid rgb(100, 178, 0);
+    background-color: rgb(237, 254, 209);
+    color: rgb(82, 147, 0);
+}
+.private-access-style{
+    background-color: #edf2ff;
+    border-color: #4277ff87;
+    color:  #4277ff;
+}
+.company-access-style{
+    background-color: #ffedd1;
+    border-color: #f38f32;
+    color: #f17f15;
+}
+.each-box-in-publish-head div span{
+    height: 14px;
+    margin-right: 4px;
+}
+.setting-in-publish-head{
+    margin-right: auto;
+    margin-left: 4px;
+    font-size: 0.875em;
+    cursor: pointer;
+    box-shadow: none;
+    padding: 0px;
+    border: 0px;
+    display: flex;
+    align-items: center;
+    font-family: inherit;
+    background-color: inherit;
+}
+.setting-in-publish-head span{
+    color: rgb(0, 117, 227);
+    margin: 3px;
+}
+.linkBox{
+    border-radius: 4px;
+    background-color: rgb(243, 243, 254);
+    color: rgb(111, 118, 167);
+    height: 2.5rem;
+    display: flex;
+    margin: 10px 0 10px;
+}
+.link{
+    padding: 12px;
+    display: flex;
+    justify-content: left;
+    width: 100%;
+}
+.edit-link-button{
+    background-color: inherit;
+    border: none;
+    outline: none;
+    padding: 0 10px;
+    color: #626777;
+}
+.line-in-link-publish{
+    border-top: 1px solid #eee;
+    margin-top: 26px;
+    height: 37px;
+}
+.invite-with-email{
+    display: flex;
+    align-items: center;
+}
+.invite-with-email h2{
+    color: var(--jfv-google-apple-blue);
+    margin: 0;
+    font-size: 16px;
+    margin-left: 11px;
+}
+.invite-with-email span{
+    background-color: #dadef3;
+    color: #343c6a;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+}
+.email-address-box-to-invite{
+    margin: 10px 0 4px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #c8ceed;
+    border-radius: 4px;
+}
+.input-box-to-email-invite{
+    width: 100%;
+}
+.input-box-to-email-invite input{
+    padding: 8px;
+    width: 100%;
+    font-family: inherit;
+    color: var(--jfv-google-apple-blue);
+    border: none;
+    outline: none;
+}
+.input-box-to-email-invite input:placeholder-shown{
+    color: inherit;
+}
+.button-in-publish-container{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    padding: 0 0 10px;
+}
+.button-in-publish-container button{
+    width: 110px;
+    background-color: #64b200;
+    color: #fff;
+    font-size: 14px;
+    padding: 0 8px;
+    font-family: inherit;
+    border: none;
+    outline: none;
+    height: 40px;
+    border-radius: .25rem;
+    margin-right: 6px;
+}
+.button-in-publish-container a{
+    width:160px;
+    background-color: #0075e3;
+    color: #fff;
+    padding: 0 8px;
+    font-size: 14px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.pdf-svg-publish{
+    background-color: #d62e2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    width: 40px;
+    border-radius: 4px;
+}
+.inside-pdf-box{
+    display: flex;
+    margin: 12px 0;
+    align-items: center;
+}
+.head-pdf-download h2{
+    margin: 0;
+    font-size: 16px;
+    color: var(--jfv-google-apple-blue);
+}
+.head-pdf-download span{
+    color: #6f76a7;
+    font-size: 14px;
+}
+.inside-pdf-box button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-right: auto;
+    border: none;
+    outline: none;
+    background-color: #64b200;
+    color: #fff;
+    height: 40px;
+    width: 140px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+}
+.setting-link-address-box{
+    position: absolute;
+    background-color: #fff;
+    border-radius: 4px;
+    margin: auto;
+    height: fit-content;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: 630px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+.head-of-setting-link{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eaebf2;
+}
+.head-of-setting-link span{
+    color: #141e46;
+    padding-right: 20px;
+    font-size: 18px;
+} 
+.head-of-setting-link button{
+    margin: 18px;
+}
+.access-settings-form{
+    padding: 24px 40px;
+}
+.each-access-mode-style{
+    display: flex;
+    align-items: center;
+    border: 1px solid #bcbdd2;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+.two-comment-access{
+    display: flex;
+    flex-direction: column;
+}
+.tick-selected-access-mode{
+    margin-right: auto;
+    margin-left: 18px;
+    display: flex;
+    align-items:center;
+}
+.two-comment-access span:nth-child(1){
+    margin-top: 12px;
+    color: #2c3345;
+    font-size: 16px;
+}
+.each-access-mode-style div:nth-child(1){
+    color: #8583a9;
+}
+.active_private{
+    background-color: #edf2ff;
+    border-color: #4277ff87;
+    color:  #4277ff;
+}
+.active_public{
+    background-color: #edfed1;
+    border-color: #64b200;
+    color: #529300;
+}
+.active_company{
+    background-color: #ffedd1;
+    border-color: #f38f32;
+    color: #f17f15;
+}
+.two-comment-access span:nth-child(2){
+    margin-bottom: 15px;
+    font-size: 15px;
+    color: #2c3345;
+}
+.invitation-message{
+    height: 106px;
+    border: 1px solid #c8ceed;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+.invitation-message textarea{
+    width: 100%;
+    height: 100%;
+    outline: none;
+    resize: none;
+    border: none;
+    font-family: inherit;
+    color: var(--jfv-google-apple-blue);
+}
+.button-to-invitation{
+    margin: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.button-to-invitation button{
+    height: 40px;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 0 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 4px;
+}
+.button-to-invitation button:nth-child(1){
+    color: #343c6a;
+    background-color: #dadef3;
+}
+.button-to-invitation button:nth-child(2){
+    color: #fff;
+    background-color: #64b200;
+}
+.company-permission{
+    display: flex;
+    flex-direction: column;
+    padding: 10px 16px 0;
+}
+.email-permission{
+    padding: 8px 0;
+}
+.email-permission input{
+    border: 1px solid #d8dae9;
+    outline: none;
+    border-radius: 2px;
+    width: 100%;
+    max-width: 300px;
+    color: #2c3345;
+    font-family: inherit;
+    padding: 8px;
+    direction: ltr;
 }
 @media (max-width: 1200px){
     .form-builder{
