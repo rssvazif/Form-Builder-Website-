@@ -4,7 +4,7 @@ const path = require('path')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const connectDB = require('./DataBase/configDB')
-const {User,Label,Form,InformationUser} = require('./DataBase/schema')
+const {User,Label,Form,InformationUser,Submission} = require('./DataBase/schema')
 const { isValidObjectId } = require('mongoose')
 require('dotenv').config()
 
@@ -184,7 +184,25 @@ app.get('/api/getUserName',async(req,res)=>{
     res.status(500).json({message:'error to get user name'})
   }
 })
-
+app.get('/api/form/:id',async(req,res)=>{
+  try{
+    const formId = req.params.id;
+    const form = await Form.findOne({_id: formId})
+    if(!form){
+      return res.status(404).json({
+        message: 'no form found !!'
+      })
+    }
+    res.status(200).json({
+      message: 'get form to edit done',
+      form: form
+    })
+  }catch(err){
+    res.status(500).json({
+      message: 'error to get form to edit'
+    })
+  }
+})
 //
 
 app.get('/api/test', (req, res) => {
@@ -193,6 +211,7 @@ app.get('/api/test', (req, res) => {
 
 
 app.get('*',(req,res)=>{
+    res.setHeader("Cache-Control", "no-cache")
     res.sendFile(path.join(__dirname,'../vite_jot/dist/index.html'))
 })
 
@@ -325,20 +344,24 @@ app.post('/api/save-form',async(req,res)=>{
     if(!user_id){
       return res.status(403).json({message:'invalid user id'})
     }
-    const {title,fields,label_id} = req.body
+    const {title,fields,label_id,status,password} = req.body
     let data_save ;
     if(label_id && isValidObjectId(label_id)){
       data_save = {
         title,
         label_id,
         fields,
-        user_id
+        user_id,
+        status,
+        password
       }
     }else{
       data_save = {
         title,
         fields,
-        user_id 
+        user_id,
+        status,
+        password 
       }
     }
     const form = await Form(data_save)
@@ -347,7 +370,7 @@ app.post('/api/save-form',async(req,res)=>{
     res.status(201).json({
       message:'form saved',
       form_id : form._id,
-      createdAt : form.createdAt
+      createdAt: form.createdAt
     })
 
   }catch(error){
@@ -452,7 +475,13 @@ app.put('/api/save-form',async(req,res)=>{
       return res.status(403).json({message:'invalid token'})
     }
     const user_id = decoded.id
-    const {title,fields,label_id,form_id} = req.body
+    const {
+      title,
+      fields,
+      label_id,
+      status,
+      password,
+      form_id} = req.body
     
     const existingForm = await Form.findOne({_id: form_id})
     if(!existingForm){
@@ -460,16 +489,23 @@ app.put('/api/save-form',async(req,res)=>{
         message:'form not found!'
       })
     }
-    const updateForm = await Form.findByIdAndUpdate(
-      form_id,
-      {
-        $set: {
+    const updateData = {
+      $set: {
           title,
           ...(label_id && { label_id }),
           fields,
-          updatedAt: new Date(),
+          status,
         }
-      },
+    }
+    if(password){
+      updateData.$set.password = password
+    }else if(existingForm.password){
+      updateData.$unset = {password:''}
+    }
+
+    const updateForm = await Form.findByIdAndUpdate(
+      form_id,
+      updateData,
       {new : true}
     )
     res.status(200).json({

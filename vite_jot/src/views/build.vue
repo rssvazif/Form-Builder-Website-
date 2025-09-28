@@ -8,10 +8,11 @@ import setting_FullName from '../components/setting_item/FullName.vue'
 import setting_Heading_menu from '../components/setting_item/Heading_menu.vue'
 import setting_Email from '../components/setting_item/Email.vue'
 import logo_without from '../components/logo_without_b_blue.vue'
-import {ref,onMounted,onUnmounted,defineAsyncComponent,shallowRef,computed ,watch} from 'vue'
+import {ref,onMounted,onUnmounted,shallowRef,computed ,watch} from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useRoute } from 'vue-router';
 import {useFormFieldsStore} from '../../stores/FormFieldsStore'
+import fieldComponents from './filedComponents';
 
 
 const Form_store = useFormFieldsStore()
@@ -20,34 +21,14 @@ const route = useRoute()
 const label_id_url = computed(()=> route.params.label_id)
 const title_form = ref('فرم')
 
-const fieldComponents = {
-    Heading_main: defineAsyncComponent(()=> import('../components/form_element/Heading_main.vue')),
-    PlaceDrop: defineAsyncComponent(()=> import('../components/form_element/PlaceDrop.vue')),
-    Heading: defineAsyncComponent(()=> import('../components/form_element/Heading_menu.vue')),
-    FullName: defineAsyncComponent(()=> import('../components/form_element/FullName.vue')),
-    Email: defineAsyncComponent(()=> import('../components/form_element/Email.vue')),
-    Address: defineAsyncComponent(()=> import('../components/form_element/Address.vue')),
-    Phone: defineAsyncComponent(()=> import('../components/form_element/Phone.vue')),
-    DatePicker: defineAsyncComponent(()=> import('../components/form_element/DatePicker.vue')),
-    ShortText: defineAsyncComponent(()=> import('../components/form_element/ShortText.vue')),
-    LongText: defineAsyncComponent(()=> import('../components/form_element/LongText.vue')),
-    Single_choise : defineAsyncComponent(()=> import('../components/form_element/Single_choise.vue')),
-    Multiple_choise: defineAsyncComponent(()=> import('../components/form_element/Multiple_choise.vue')),
-    Number: defineAsyncComponent(()=> import('../components/form_element/Number.vue')),
-    Image: defineAsyncComponent(()=> import('../components/form_element/Image.vue')),
-    Upload_file:defineAsyncComponent(()=> import('../components/form_element/Upload_file.vue')),
-    Time: defineAsyncComponent(()=> import('../components/form_element/Time.vue')),
-    Spinner: defineAsyncComponent(()=> import('../components/form_element/Spinner.vue')),
-    Submit: defineAsyncComponent(()=> import('../components/form_element/Submit.vue')),
-}
 const replace_index = ref('')
-const Date_created = ref(new Date())
+const Date_created = ref('')
 const location_index = ref('')
 const activeFieldId = ref(null)
 const formSectionRef = ref(null)
 const display_section = ref('')
 const show_more = ref(false)
-const setPassword = ref(false)
+const isSetPassword = ref(false)
 const change_type_input = ref(false)
 const protection_password = ref('')
 const open_setting = ref(false)
@@ -56,8 +37,14 @@ const showSettingPublish = ref(false)
 const accessSetting = ref('public')
 const openToInvite = ref(false)
 const emailPermissionCompany = ref('')
+const formLink = ref('')
+const isCopy = ref(false)
+const statusForm = ref('فعال')
+const isPasswordSet = ref(false)
+const passwordSetMessage = ref('')
+const isResetPassword = ref(false)
 const status = ref([
-    'فعال','غیرفعال','غیرفعال در محدودیت ارسال'
+    'فعال','غیرفعال','غیرفعال در محدودیت ارسال (به زودی)'
 ])
 const index_status = ref(0)
 const show_optionStatus = ref(false)
@@ -104,7 +91,7 @@ onMounted(() => {
   }else{
     first_build()
   }
-  
+
 })
 
 onUnmounted(() => {
@@ -225,7 +212,33 @@ function ondrop(event){
     }
     Form_store.addFields(data,Ind)
 }
-
+function setPassword(){
+    if(protection_password.value.trim().length !== 0 && protection_password.value.trim() !== ''){
+        isPasswordSet.value = true
+        passwordSetMessage.value = 'رمز عبور ذخیره شد!'
+        setTimeout(() => {
+            passwordSetMessage.value = ''
+        }, 3000);
+    }else{
+        protection_password.value = ''
+        isPasswordSet.value = false
+        return
+    }
+}
+function showAnotherPage(){
+    window.open(formLink.value,"_blank")
+}
+async function copyLink(){
+    try{
+        await navigator.clipboard.writeText(formLink.value)
+        isCopy.value = true
+        setTimeout(() => {
+            isCopy.value = false
+        }, 3000);
+    }catch(err){
+        console.log(`error to copy ${err}`)
+    }
+}
 function handleAccessSetting(){
     if(accessSetting.value === 'company' && emailPermissionCompany.value === ''){
         accessSetting.value = 'public'
@@ -243,6 +256,7 @@ function show_more_less(){
 }
 function save_index_status(index){
     index_status.value = index
+    statusForm.value = status.value[index_status.value]
 }
 function set_settingPanel(type){
     open_setting.value = true
@@ -276,6 +290,14 @@ async function get_oldForm_to_edit(form_id){
         const data = await response.json()
         Form_store.setEditForm(data.form)
         title_form.value = data.form.title
+        Date_created.value = data.form.createdAt
+        statusForm.value = data.form.status
+        protection_password.value = data.form.password
+        if(protection_password.value){
+            isResetPassword.value = true
+        }else{
+            isResetPassword.value = false
+        }
         oldForm.value = {_id : form_id}
     }catch(error){
         console.log(error);
@@ -311,7 +333,9 @@ async function save_Form(){
         const payload = {
             title: title_form.value,
             fields : Form_store.fields,
-            label_id: label_id_url.value
+            label_id: label_id_url.value,
+            status: statusForm.value,
+            password: protection_password.value
         }
         if(oldForm.value){
             payload.form_id = oldForm.value._id
@@ -329,22 +353,27 @@ async function save_Form(){
             console.log(errordata.message);        
         }
         const data = await response.json()
-        Date_created.value = data.createdAt || new Date()
+        Date_created.value = data.updatedAt || data.createdAt
         if(!oldForm.value && data.form_id){
             oldForm.value = {_id: data.form_id}
         }
-        
+        formLink.value = `http://localhost/form/${data.form_id}`
     }catch(error){
         console.log(error.message);
     }
 }
 const debouncedSave = useDebounceFn(() => {
   save_Form()
-}, 3000)
+}, 2000)
 
-watch(() => Form_store.fields, () => {
-  debouncedSave()
-}, { deep: true })
+watch(
+  [() => Form_store.fields, () => statusForm,()=> isPasswordSet],
+  () => {
+    debouncedSave()
+  },
+  { deep: true }
+)
+
 </script>
 
 <template>
@@ -456,12 +485,16 @@ watch(() => Form_store.fields, () => {
                             <p>فعالسازی ، غیرفعالسازی یا فعالسازی با شرایط خاص فرم</p>
                             <button @click.prevent="change_status = true">
                                 <div style="display: flex; width: 32px; height: 32px;
-                                justify-content: center; align-items: center; background-color: #64b200; border-radius: 4px; padding: 5px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 24 24" width="30" height="21"><path fill-rule="evenodd" d="M21 20v-6.5a7.46 7.46 0 0 1-3.918 1.478A1.14 1.14 0 0 1 16.36 17H7.64a1.14 1.14 0 0 1 0-2.28h6.823a7.484 7.484 0 0 1-2.907-1.58H7.64a1.14 1.14 0 0 1 0-2.28h2.153a7.448 7.448 0 0 1-.58-1.58H7.64a1.14 1.14 0 0 1 0-2.28h1.376a7.5 7.5 0 0 1 3.74-6H6a3 3 0 0 0-3 3v16a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3Zm1-12.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Zm-2.293-2.207a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414 0l-1.5-1.5a1 1 0 0 1 1.414-1.414l.793.793 2.293-2.293a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"></path></svg>
+                                justify-content: center; align-items: center; border-radius: 4px; padding: 5px;" :style="{backgroundColor:statusForm === 'فعال'?'#64b200':'#596066'}">
+                                    <svg v-if="statusForm === 'فعال'" xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 24 24" width="30" height="21"><path fill-rule="evenodd" d="M21 20v-6.5a7.46 7.46 0 0 1-3.918 1.478A1.14 1.14 0 0 1 16.36 17H7.64a1.14 1.14 0 0 1 0-2.28h6.823a7.484 7.484 0 0 1-2.907-1.58H7.64a1.14 1.14 0 0 1 0-2.28h2.153a7.448 7.448 0 0 1-.58-1.58H7.64a1.14 1.14 0 0 1 0-2.28h1.376a7.5 7.5 0 0 1 3.74-6H6a3 3 0 0 0-3 3v16a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3Zm1-12.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Zm-2.293-2.207a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414 0l-1.5-1.5a1 1 0 0 1 1.414-1.414l.793.793 2.293-2.293a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"></path></svg>
+                                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 24 24" width="20" height="20"><path fill-rule="evenodd" d="M21 20v-6.5a7.46 7.46 0 0 1-3.918 1.478A1.14 1.14 0 0 1 16.36 17H7.64a1.14 1.14 0 0 1 0-2.28h6.823a7.485 7.485 0 0 1-2.907-1.58H7.64a1.14 1.14 0 0 1 0-2.28h2.153a7.447 7.447 0 0 1-.58-1.58H7.64a1.14 1.14 0 0 1 0-2.28h1.376a7.5 7.5 0 0 1 3.74-6H6a3 3 0 0 0-3 3v16a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3Zm1-12.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Zm-3.293-.793a1 1 0 0 0-1.414-1.414l-.793.793-.793-.793a1 1 0 1 0-1.414 1.414l.793.793-.793.793a1 1 0 0 0 1.414 1.414l.793-.793.793.793a1 1 0 0 0 1.414-1.414l-.793-.793.793-.793Z" clip-rule="evenodd"></path></svg>
                                 </div>
                                 <div>
-                                    <span id="status-text">{{ status[index_status] }}</span>
-                                    <span id="status-comment">فرم شما درحال حاضر فعال است</span>
+                                    <span id="status-text" :style="{color:statusForm === 'غیرفعال'?'#596066':''}">{{ statusForm }}</span>
+                                    <span id="status-comment">
+                                        <span v-if="statusForm === 'فعال'">فرم شما درحال حاضر فعال است</span>
+                                        <span v-else-if="statusForm === 'غیرفعال'">فرم شما درحال حاضر غیرفعال است</span>
+                                    </span>
                                 </div>
                                 <div style="display: flex;">    
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="20" height="20" style="fill: rgb(197, 197, 197); transform: rotate(180deg);"><path fill-rule="evenodd" d="M12 23c6.075 0 11-4.925 11-11S18.075 1 12 1 1 5.925 1 12s4.925 11 11 11Zm-1.707-7.707a1 1 0 1 0 1.414 1.414l4-4a1 1 0 0 0 0-1.414l-4-4a1 1 0 1 0-1.414 1.414L13.586 12l-3.293 3.293Z" clip-rule="evenodd"></path></svg>
@@ -495,7 +528,7 @@ watch(() => Form_store.fields, () => {
                                         <h3>وضعیت فرم</h3>
                                         <p style="color:#6c73a8; font-size: 14px;">فعال ، غیرفعال یا فعال با شرایط خاص</p>
                                         <button id="overflow-button" @click.prevent="show_optionStatus = !show_optionStatus">
-                                            <span style="font-size: 14px; color: var(--jfv-google-apple-blue); font-weight: 600;">{{ status[index_status] }}</span>
+                                            <span style="font-size: 14px; color: var(--jfv-google-apple-blue); font-weight: 600;">{{ statusForm }}</span>
                                             <span>
                                                 <svg style="display: flex; color: rgba(10, 21, 81); transition: .3s ease;" width="20" :class="{rotate_arrow_status:show_optionStatus}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.293 10.293a1 1 0 0 1 1.414 0L12 13.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"></path></svg>
                                             </span>
@@ -505,8 +538,8 @@ watch(() => Form_store.fields, () => {
                                         </div>
                                     </div>
                                     <div class="save-cancel-status">
-                                        <button id="cancel-id">لغو</button>
-                                        <button id="save-id">ذخیره</button>
+                                        <button id="cancel-id" @click.prevent="change_status = false">لغو</button>
+                                        <button id="save-id" @click.prevent="statusForm = status[index_status] , change_status = false">ذخیره</button>
                                     </div>
                                 </div>
                             </div>
@@ -517,17 +550,23 @@ watch(() => Form_store.fields, () => {
                         <div>رمز محافظت</div>
                         <p>برای کنترل دسترسی به فرم رمز تعیین کنید</p>
                         <div class="enable-pasword">
-                            <input type="checkbox" @click="setPassword = !setPassword">
-                            <span style="min-width: 134px;">فعال سازی رمز محافظت</span>
-                            <div v-if="setPassword" style="display: flex; justify-content:space-between; width: 100%; align-items: center;">
-                                <input v-if="!change_type_input" id="pas-protection" type="password" placeholder="رمز را وارد کنید" v-model="protection_password">
-                                <input v-else id="pas-protection" type="text" placeholder="رمز را وارد کنید" v-model="protection_password">
+                            <input type="checkbox" :checked="protection_password" @click="isSetPassword = !isSetPassword">
+                            <span style="min-width: 134px;cursor: pointer;" @click="isSetPassword = !isSetPassword">فعال سازی رمز محافظت</span>
+                            <div v-if="isSetPassword" style="display: flex; justify-content:space-between; width: 100%; align-items: center;">
+                                <input v-if="!change_type_input" id="pas-protection" type="password" placeholder="رمز را وارد کنید" v-model="protection_password" @blur="setPassword()">
+                                <input v-else id="pas-protection" type="text" placeholder="رمز را وارد کنید" v-model="protection_password" @blur="setPassword()">
                                 <div style="width: 40px;">
                                     <span class="span-show-icon">
                                         <svg @click.prevent="change_type_input = !change_type_input" style="display: flex ;" xmlns="http://www.w3.org/2000/svg" width="20" fill="#564632" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 4C9.277 4 7.031 5.239 5.33 6.698c-1.7 1.458-2.89 3.164-3.512 4.174-.43.697-.43 1.56 0 2.256.623 1.01 1.812 2.716 3.512 4.174C7.032 18.762 9.278 20 12 20c2.72 0 4.967-1.239 6.668-2.698 1.7-1.458 2.89-3.164 3.513-4.174a2.138 2.138 0 0 0 0-2.256c-.623-1.01-1.812-2.716-3.513-4.174C16.968 5.238 14.721 4 12 4Zm0 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm2-4a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" clip-rule="evenodd"></path></svg>
                                     </span>
                                 </div>
                             </div>
+                        </div>
+                        <div v-if="passwordSetMessage" class="text-after-set-password">
+                            {{ passwordSetMessage }}
+                        </div>
+                        <div v-if="isResetPassword" class="text-reset-password" @click="protection_password = '',setPassword(),isResetPassword= false">
+                            <span>تنظیم مجدد رمز عبور</span>
                         </div>
                     </div>
                     <hr>
@@ -660,15 +699,18 @@ watch(() => Form_store.fields, () => {
                                 <svg width="18px" style="display: flex; justify-content: center; align-items: center;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M18.715 2.586a2 2 0 0 0-2.829 0L3.782 14.69a2 2 0 0 0-.499.83l-1.189 3.888c-.468 1.532.966 2.966 2.498 2.497l3.888-1.19a2 2 0 0 0 .829-.498L21.414 8.113a2 2 0 0 0 0-2.828l-2.7-2.7Zm-2.909 2.908L17.301 4l2.698 2.699-1.494 1.494-2.699-2.699Z" clip-rule="evenodd"></path></svg>
                             </button>
                             <div class="link">
-                                http://localhost:form/23423524
+                                <input type="text" v-model="formLink" disabled>
                             </div>
                             <div style="display: flex;margin: 0 10px;">
                                 <svg width="20" style="display: flex; justify-content: center;align-items: center;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M17.959 6.04a3.714 3.714 0 0 1 0 5.253l-1.334 1.334a1 1 0 0 0 1.415 1.414l1.333-1.334a5.714 5.714 0 1 0-8.08-8.08L9.958 5.96a1 1 0 1 0 1.414 1.414l1.333-1.333a3.714 3.714 0 0 1 5.253 0Zm-10 10a1 1 0 0 1 0-1.414l6.667-6.667a1 1 0 1 1 1.414 1.414L9.374 16.04a1 1 0 0 1-1.415 0ZM6.04 12.707a3.714 3.714 0 0 0 5.252 5.252l1.334-1.333a1 1 0 1 1 1.414 1.414l-1.333 1.333a5.714 5.714 0 1 1-8.081-8.08l1.333-1.334a1 1 0 1 1 1.414 1.414L6.04 12.707Z" clip-rule="evenodd"></path></svg>
                             </div>
                         </div>
                         <div class="button-in-publish-container" v-if="!openToInvite">
-                            <router-link to="/form/2423542" target="_blank">نمایش در صفحه دیگر</router-link>
-                            <button>کپی آدرس</button>
+                            <button @click="showAnotherPage()">نمایش در صفحه دیگر</button>
+                            <button @click="copyLink()">
+                               <span v-if="!isCopy"> کپی آدرس</span>
+                               <span v-if="isCopy">کپی شد</span>
+                            </button>
                         </div>
                         <div class="line-in-link-publish" v-if="!openToInvite"></div>
                         <div>
@@ -1169,8 +1211,8 @@ hr{
 }
 .enable-pasword input{
     outline: none;
-    width: 20px;
-    height: 20px;
+    width: fit-content;
+    height: 100%;
     margin: 0;
     cursor: pointer;
 }
@@ -1196,7 +1238,11 @@ hr{
     height: 25px;
     padding: 2px 5px;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: bolder;
+    background-color: #f0f0f0;
+    color: #9b8a73;
+    direction: ltr;
 }
 .span-show-icon{
     color: #564632;
@@ -1560,6 +1606,17 @@ hr{
     justify-content: left;
     width: 100%;
 }
+.link input{
+    background-color: inherit;
+    font-family: inherit;
+    color: #6f76a7;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 4px 8px;
+    font-size: 14px;
+    direction: ltr;
+}
 .edit-link-button{
     background-color: inherit;
     border: none;
@@ -1619,7 +1676,7 @@ hr{
     align-items: center;
     padding: 0 0 10px;
 }
-.button-in-publish-container button{
+.button-in-publish-container button:nth-child(2){
     width: 110px;
     background-color: #64b200;
     color: #fff;
@@ -1632,7 +1689,7 @@ hr{
     border-radius: .25rem;
     margin-right: 6px;
 }
-.button-in-publish-container a{
+.button-in-publish-container button:nth-child(1){
     width:160px;
     background-color: #0075e3;
     color: #fff;
@@ -1642,6 +1699,10 @@ hr{
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: .25rem;
+    border: none;
+    outline: none;
+    font-family: inherit;
 }
 .pdf-svg-publish{
     background-color: #d62e2e;
@@ -1817,6 +1878,24 @@ hr{
     font-family: inherit;
     padding: 8px;
     direction: ltr;
+}
+.text-after-set-password{
+    color: #64b200;
+    font-size: 14px;
+    padding: 10px 0;
+}
+.text-reset-password{
+    padding: 10px 0;
+}
+.text-reset-password span{
+    font-size: 14px;
+    color: #fff;
+    border-radius: 4px;
+    background-color: #9b8a73;
+    cursor: pointer;
+}
+.text-reset-password span:hover{
+    background-color: #b0a391;
 }
 @media (max-width: 1200px){
     .form-builder{
