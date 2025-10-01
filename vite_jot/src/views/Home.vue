@@ -170,6 +170,23 @@ async function send_new_user(e){
         alert(Error.message)
     }
 }
+async function testAuth(){
+    try{
+        const response = await fetch(`http://localhost:3000/user/test/googleAuth`,{
+            method:"GET",
+            headers:{
+                "Content-Type":"application/json"
+            }
+        })
+        if(!response.ok){
+            throw new Error("error to get response");
+        }
+        const data = await response.json()
+        console.log(data)   
+    }catch(err){
+        throw new Error("error to send request to server")
+    }
+}
 </script>
 
 <template>
@@ -377,6 +394,7 @@ async function send_new_user(e){
     <section class="page-welcome container">
         <div class="title">
             <h1>آسان ترین فرم ساز آنلاین</h1>
+            <button @click="testAuth()">test</button>
             <h2>فرم‌های قدرتمند، کار را انجام می‌دهند.</h2>
             <p>ما باور داریم که یک فرم مناسب می‌تواند تفاوت بزرگی ایجاد کند. از کارهای تکراری و وقت‌گیر فاصله بگیرید و با فرم‌های هوشمندی که از منطق شرطی پشتیبانی می‌کنند، گزارش‌ تولید می‌کنند و گردش‌ کارها را خودکار می‌سازند، بهره‌وری خود را افزایش دهید.</p>
         </div>

@@ -8,11 +8,13 @@
   "keywords": [
     "jotform",
     "form builder",
-    "website"],
+    "website"
+  ],
   "author": "Reza Vazifeh Doust",
   "license": "MIT",
   "description": "this module is for jotform server",
   "dependencies": {
+    "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

@@ -1,12 +1,12 @@
 
-FROM node:20 AS builder
+FROM node:22.12.0 AS builder
 
 WORKDIR /app
 COPY . .
 RUN npm install
 RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:latest
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 

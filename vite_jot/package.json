@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^13.5.0",
+    "dotenv": "^17.2.3",
     "pinia": "^3.0.3",
     "v-click-outside": "^3.2.0",
     "vue": "^3.3.8",

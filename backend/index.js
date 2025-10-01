@@ -8,6 +8,11 @@ const {User,Label,Form,InformationUser,Submission} = require('./DataBase/schema'
 const { isValidObjectId } = require('mongoose')
 require('dotenv').config()
 
+////////////////////////////////////////////
+const userRoutes = require("./routes/user.routes")
+
+////////////////////////////////////////////
+
 const saltRounds = 10;
 const app = exprees()
 app.use(cors())
@@ -20,6 +25,9 @@ connectDB();
 
 
 // Get method
+/////////////////////////////////////////////
+app.use("/user",userRoutes)
+////////////////////////////////////////////
 
 app.get('/api/get_label', async(req,res)=>{
   try{
