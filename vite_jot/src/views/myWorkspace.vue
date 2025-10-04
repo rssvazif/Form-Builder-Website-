@@ -138,6 +138,7 @@
         localStorage.setItem("expiry", expiryTime.toString());
 
         window.history.replaceState({}, document.title, window.location.pathname);
+        window.location.reload(); 
         }
     }
     async function get_userName(){

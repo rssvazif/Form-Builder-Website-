@@ -34,7 +34,7 @@ exports.redirectAuth = async (req, res) => {
     const user = await User.findOne({ email: userInfo.email });
     if (user) {
       const token = authorization.createJWT(user._id);
-      return res.redirect(`http://localhost:5173/myWorkspace?token=${token}`);
+      return res.redirect(`http://localhost/myWorkspace?token=${token}`);
     } else {
       const randomPassword = uuidv4();
       const hashedPassword = await bcrypt.hash(randomPassword, saltRounds);
@@ -45,7 +45,7 @@ exports.redirectAuth = async (req, res) => {
       });
       await newUser.save();
       const token = authorization.createJWT(newUser._id);
-      return res.redirect(`http://localhost:5173/myWorkspace?token=${token}`);
+      return res.redirect(`http://localhost/myWorkspace?token=${token}`);
     }
   } catch (err) {
     res.status(500).json({ error: "error in redirect controller" });
