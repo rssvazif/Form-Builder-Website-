@@ -12,6 +12,7 @@ import footer_endPage from '../components/footer_endPage.vue'
 import {onMounted, ref, onUnmounted ,computed} from 'vue'
 import SignUp from '../components/signUp.vue'
 import { useSignUp_LoginStore } from '../../stores/SignUp_LoginStore'
+import user from "../services/users/user.manager"
 
 const user_store = useSignUp_LoginStore()
 const Login_on = ref(false)
@@ -170,23 +171,6 @@ async function send_new_user(e){
         alert(Error.message)
     }
 }
-async function testAuth(){
-    try{
-        const response = await fetch(`http://localhost:3000/user/test/googleAuth`,{
-            method:"GET",
-            headers:{
-                "Content-Type":"application/json"
-            }
-        })
-        if(!response.ok){
-            throw new Error("error to get response");
-        }
-        const data = await response.json()
-        console.log(data)   
-    }catch(err){
-        throw new Error("error to send request to server")
-    }
-}
 </script>
 
 <template>
@@ -293,7 +277,7 @@ async function testAuth(){
             <p>اطلاعات، پرداخت‌ها و امضاها را با فرم‌های آنلاین سفارشی جمع‌آوری کن.</p>
             <p id="signUp-p">ورود با</p>
             <div class="signUp-with">
-                <button>
+                <button @click="user.authWithGoogle()"> 
                     <span><svg fill="none" width="32" xmlns="http://www.w3.org/2000/svg" viewBox="2 1 32 32"><circle cx="18.5" cy="18" r="18" fill="white"></circle><path d="M30.8759 18.2751C30.8759 17.2576 30.7916 16.5151 30.6093 15.7451H18.7534V20.3376H25.7125C25.5723 21.4789 24.8146 23.1976 23.1309 24.3525L23.1073 24.5063L26.8559 27.3522L27.1156 27.3776C29.5008 25.2188 30.8759 22.0426 30.8759 18.2751Z" fill="#4285F4"></path><path d="M18.7518 30.3758C22.1612 30.3758 25.0234 29.2758 27.114 27.3783L23.1293 24.3532C22.063 25.082 20.6318 25.5907 18.7518 25.5907C15.4125 25.5907 12.5784 23.432 11.5681 20.4482L11.42 20.4606L7.52217 23.4169L7.47119 23.5557C9.54769 27.5982 13.813 30.3758 18.7518 30.3758Z" fill="#34A853"></path><path d="M11.5695 20.4475C11.303 19.6775 11.1487 18.8525 11.1487 18C11.1487 17.1475 11.303 16.3225 11.5555 15.5525L11.5485 15.3885L7.60177 12.3848L7.47264 12.445C6.61681 14.1225 6.12573 16.0063 6.12573 18C6.12573 19.9938 6.61681 21.8774 7.47264 23.555L11.5695 20.4475Z" fill="#FBBC05"></path><path d="M18.7519 10.4109C21.123 10.4109 22.7225 11.4147 23.6345 12.2535L27.1983 8.84348C25.0095 6.84973 22.1612 5.62598 18.7519 5.62598C13.813 5.62598 9.5477 8.40346 7.47119 12.4459L11.5541 15.5535C12.5784 12.5697 15.4126 10.4109 18.7519 10.4109Z" fill="#EB4335"></path></svg></span>
                     <span>گوگل</span>
                 </button>
@@ -332,7 +316,7 @@ async function testAuth(){
             <p>اطلاعات، پرداخت‌ها و امضاها را با فرم‌های آنلاین سفارشی جمع‌آوری کن.</p>
             <p id="signUp-p" v-if="!accept_email">ثبت نام با</p>
             <div class="signUp-with" v-if="!accept_email">
-                <button>
+                <button @click="user.authWithGoogle()">
                     <span><svg fill="none" width="32" xmlns="http://www.w3.org/2000/svg" viewBox="2 1 32 32"><circle cx="18.5" cy="18" r="18" fill="white"></circle><path d="M30.8759 18.2751C30.8759 17.2576 30.7916 16.5151 30.6093 15.7451H18.7534V20.3376H25.7125C25.5723 21.4789 24.8146 23.1976 23.1309 24.3525L23.1073 24.5063L26.8559 27.3522L27.1156 27.3776C29.5008 25.2188 30.8759 22.0426 30.8759 18.2751Z" fill="#4285F4"></path><path d="M18.7518 30.3758C22.1612 30.3758 25.0234 29.2758 27.114 27.3783L23.1293 24.3532C22.063 25.082 20.6318 25.5907 18.7518 25.5907C15.4125 25.5907 12.5784 23.432 11.5681 20.4482L11.42 20.4606L7.52217 23.4169L7.47119 23.5557C9.54769 27.5982 13.813 30.3758 18.7518 30.3758Z" fill="#34A853"></path><path d="M11.5695 20.4475C11.303 19.6775 11.1487 18.8525 11.1487 18C11.1487 17.1475 11.303 16.3225 11.5555 15.5525L11.5485 15.3885L7.60177 12.3848L7.47264 12.445C6.61681 14.1225 6.12573 16.0063 6.12573 18C6.12573 19.9938 6.61681 21.8774 7.47264 23.555L11.5695 20.4475Z" fill="#FBBC05"></path><path d="M18.7519 10.4109C21.123 10.4109 22.7225 11.4147 23.6345 12.2535L27.1983 8.84348C25.0095 6.84973 22.1612 5.62598 18.7519 5.62598C13.813 5.62598 9.5477 8.40346 7.47119 12.4459L11.5541 15.5535C12.5784 12.5697 15.4126 10.4109 18.7519 10.4109Z" fill="#EB4335"></path></svg></span>
                     <span>گوگل</span>
                 </button>
@@ -394,7 +378,6 @@ async function testAuth(){
     <section class="page-welcome container">
         <div class="title">
             <h1>آسان ترین فرم ساز آنلاین</h1>
-            <button @click="testAuth()">test</button>
             <h2>فرم‌های قدرتمند، کار را انجام می‌دهند.</h2>
             <p>ما باور داریم که یک فرم مناسب می‌تواند تفاوت بزرگی ایجاد کند. از کارهای تکراری و وقت‌گیر فاصله بگیرید و با فرم‌های هوشمندی که از منطق شرطی پشتیبانی می‌کنند، گزارش‌ تولید می‌کنند و گردش‌ کارها را خودکار می‌سازند، بهره‌وری خود را افزایش دهید.</p>
         </div>

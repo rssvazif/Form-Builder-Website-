@@ -1,20 +1,19 @@
 const axios = require("axios");
-const jwt = require("jsonwebtoken");
 
 class GoogleAuth {
   #clientId;
   #clientSecret;
   #redirectUri;
-  constructor({ clientId, clientSecret, redirectUri }) {
-    this.#clientId = clientId;
-    this.#clientSecret = clientSecret;
-    this.#redirectUri = redirectUri;
+  constructor({ client_id, client_secret, redirect_uri }) {
+    this.#clientId = client_id;
+    this.#clientSecret = client_secret;
+    this.#redirectUri = redirect_uri;
   }
   getAuthUrl() {
     const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
     const options = {
-      clientId: this.#clientId,
-      redirectUri: this.#redirectUri,
+      client_id: this.#clientId,
+      redirect_uri: this.#redirectUri,
       response_type: "code",
       scope: "openid email profile",
       access_type: "offline",

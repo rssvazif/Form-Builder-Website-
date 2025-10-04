@@ -27,6 +27,7 @@ connectDB();
 // Get method
 /////////////////////////////////////////////
 app.use("/user",userRoutes)
+app.use("/auth",userRoutes)
 ////////////////////////////////////////////
 
 app.get('/api/get_label', async(req,res)=>{

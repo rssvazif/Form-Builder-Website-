@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const userControllers = require("../controllers/userController");
 
-router.get("/test/googleAuth", userControllers.test);
+router.get("/googleAuth", userControllers.googleAuth);
+router.get("/auth",userControllers.redirectAuth);
+router.get("/google/callback",userControllers.redirectAuth);
 
 module.exports = router;
