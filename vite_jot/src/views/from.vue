@@ -2,7 +2,7 @@
 import {ref,onMounted} from 'vue'
 import { useRoute } from 'vue-router'
 import {useFormFieldsStore} from '../../stores/FormFieldsStore'
-import fieldComponents from './filedComponents'
+import fieldComponents from '../components/filedComponents'
 import logo from '../components/logo.vue'
 
 const route = useRoute()

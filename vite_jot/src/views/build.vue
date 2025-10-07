@@ -12,7 +12,7 @@ import {ref,onMounted,onUnmounted,shallowRef,computed ,watch} from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useRoute } from 'vue-router';
 import {useFormFieldsStore} from '../../stores/FormFieldsStore'
-import fieldComponents from './filedComponents';
+import fieldComponents from '../components/filedComponents';
 
 
 const Form_store = useFormFieldsStore()

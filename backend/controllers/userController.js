@@ -1,10 +1,8 @@
 const GoogleAuth = require("../services/googleAuth");
 const { User } = require("../DataBase/schema");
-const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const authorization = require("../services/authorization");
 require("dotenv").config();
-const saltRounds = 10;
 
 const googleService = new GoogleAuth({
   client_id: process.env.GOOGLE_CLIENT_ID,
@@ -37,7 +35,7 @@ exports.redirectAuth = async (req, res) => {
       return res.redirect(`http://localhost/myWorkspace?token=${token}`);
     } else {
       const randomPassword = uuidv4();
-      const hashedPassword = await bcrypt.hash(randomPassword, saltRounds);
+      const hashedPassword = await userService.hashPassword(randomPassword)
       const newUser = new User({
         username: userInfo.name,
         email: userInfo.email,
