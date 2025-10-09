@@ -28,6 +28,7 @@ connectDB();
 /////////////////////////////////////////////
 app.use("/user",userRoutes)
 app.use("/auth",userRoutes)
+app.use("/api",userRoutes)
 ////////////////////////////////////////////
 
 app.get('/api/get_label', async(req,res)=>{
@@ -163,36 +164,7 @@ app.get('/api/editForm/:id',async(req,res)=>{
     })
   }
 })
-app.get('/api/getUserName',async(req,res)=>{
-  try{
-    const authHeader = req.headers['authorization']
-    if (!authHeader) {
-      return res.status(401).json({ message: 'توکن وجود ندارد!' });
-    }
-    const token = authHeader.split(' ')[1]
-    if(!token){
-      return res.status(401).json({message:'user not exist!'})
-    }
-    let decoded;
-    try{
-      decoded = jwt.verify(token,process.env.JWT_SECRET)
-    }catch(error){
-      console.log(error);
-      return res.status(403).json({message:'invalid token'})
-    }
-    const user_id = decoded.id
-    const user_name = await User.findOne({_id: user_id}).select('username')
-    if(!user_name){
-      return res.status(404).json({message:'error to find user'})
-    }
-    res.status(200).json({
-      message:'user name got',
-      User_Name: user_name.username
-    })
-  }catch(error){
-    res.status(500).json({message:'error to get user name'})
-  }
-})
+
 app.get('/api/form/:id',async(req,res)=>{
   try{
     const formId = req.params.id;
@@ -226,39 +198,6 @@ app.get('*',(req,res)=>{
 
 //post methods
 
-app.post('/api/User', async(req,res)=>{
-  try{
-    const {username,email,password} = req.body;
-
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    const check_signendUp = await User.findOne({email:email})
-    if(check_signendUp){
-      return res.status(404).json({message:'کاربر قبلا ثبت نام کرده است.'})
-    }
-    const new_user = new User({
-      username,
-      email,
-      password:hashedPassword
-    })
-    await new_user.save()
-    const token = jwt.sign(
-      {id: new_user._id},
-      process.env.JWT_SECRET,
-      {expiresIn: '1d'}
-    )    
-
-    res.status(201).json({
-      message:'user created',
-      token
-    })
-    console.log('user signed up.');
-  }catch(error){
-    console.log(error);
-    res.status(500).json({message:'user not created'})
-  }
-})
-
 app.post('/api/Label', async(req,res)=>{
   try{
     const authHeader = req.headers['authorization']
@@ -291,43 +230,6 @@ app.post('/api/Label', async(req,res)=>{
     console.log(error);
     res.status(500).json({
       message:'error to add label'
-    })
-  }
-})
-
-app.post('/api/login', async(req,res)=>{
-  try{
-    const {email_username,password} = req.body
-    const user = await User.findOne({
-      $or:[
-        {email:email_username},
-        {username:email_username}
-      ]
-    })
-    if(!user){
-      return res.status(404).json({
-        message:'user is not found.'
-      })
-    }
-    const isMatch = await bcrypt.compare(password,user.password)
-    if(!isMatch){
-      return res.status(401).json({
-        message:'password is incorrect.'
-      })
-    }
-    const token = jwt.sign(
-      {id:user._id},
-      process.env.JWT_SECRET,
-      {expiresIn:'1d'}
-    )
-    res.status(200).json({
-      message:'user login done.',
-      token
-    })
-  }catch(error){
-    console.log(error.message);
-    res.status(500).json({
-      message:'error to login.'
     })
   }
 })

@@ -9,6 +9,16 @@ class Authorization {
     return token;
   }
   parseJWT() {}
+
+  checkToken(token) {
+    const selfToken = token.split(" ")[1];
+    const tokenDecoded = jwt.verify(selfToken, process.env.JWT_SECRET);
+    if (!tokenDecoded) {
+      return null;
+    } else {
+      return tokenDecoded;
+    }
+  }
 }
 
 module.exports = new Authorization();
