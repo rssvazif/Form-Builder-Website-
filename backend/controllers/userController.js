@@ -2,7 +2,7 @@ const GoogleAuth = require("../services/googleAuth");
 const { User } = require("../DataBase/schema");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
-const userService = require("../services/user.service")
+const userService = require("../services/user.service");
 const authorization = require("../services/authorization");
 require("dotenv").config();
 
@@ -12,7 +12,7 @@ const googleService = new GoogleAuth({
   redirect_uri: process.env.GOOGLE_REDIRECT_URL,
 });
 
-exports.googleAuth = (req, res) => {
+exports.googleAuth = async (req, res) => {
   const url = googleService.getAuthUrl();
   res.redirect(url);
 };
@@ -104,8 +104,46 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "password is incorrect" });
     }
     const token = authorization.createJWT(user._id);
-    res.status(200).json({ message: "user login done" ,token});
+    res.status(200).json({ message: "user login done", token });
   } catch (err) {
     res.status(500).json({ message: "error while login" });
+  }
+};
+
+exports.getInfo = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    res.status(200).json({
+      message: "user name got",
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "error to get username in server" });
+  }
+};
+
+exports.updateUsername = async (req, res) => {
+  try {
+    const { email, newUsername } = req.body;
+    const updatedUser = await User.updateOne(
+      {
+        email: email,
+      },
+      {
+        $set: { username: newUsername },
+      }
+    );
+    if(updatedUser.matchedCount === 0) {
+      return res.status(404).json({message:"user for update not found"})
+    }
+    res.status(200).json({message:"username updated"})
+  } catch (err) {
+    res.status(500).json({ message: "error to update username" });
   }
 };

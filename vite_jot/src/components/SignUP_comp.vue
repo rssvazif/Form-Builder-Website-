@@ -45,6 +45,10 @@ async function send_new_user(e){
             text_error.value = 'تمام فیلد ها را تکمیل کنید'
             return
         }
+        if(New_User.password.length < 6) {
+            text_error.value = "حداقل طول رمز عبور 6 کاراکتر است"
+            return
+        }
         const response = await fetch('/api/User',{
             method: 'POST',
             headers:{

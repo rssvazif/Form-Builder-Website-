@@ -36,6 +36,7 @@ async function login_User(){
             }else if(errordata.message === 'password is incorrect.'){
                 text_error.value = 'رمز عبور نادرست است.'
             }
+            text_error.value = "اطلاعات وارد شده نامعتبر است"
             throw new Error(errordata.message)
         }
 

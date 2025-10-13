@@ -179,9 +179,11 @@ function logOut_user(){
                         معتبر
                     </div>
                 </div>
-                <div class="user-bar">
-                    <button>تنظیمات</button>
-                </div>
+                <router-link to="/profile">
+                    <div class="user-bar">
+                        <button>حساب کاربری</button>
+                    </div>
+                </router-link>
                 <div class="user-bar" @click="logOut_user()">
                     <button>خروج از حساب</button>
                 </div>

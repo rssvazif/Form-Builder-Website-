@@ -4,7 +4,7 @@ const {User,InformationUser,Label,Form} = require('./schema')
 
 const connectDB = async ()=>{
     try{
-        await mongoose.connect('mongodb://jotForm_mongo:27017/JotFormDB')
+        await mongoose.connect('mongodb://localhost:27017/JotFormDB')
         console.log('connect to dbs is done.');
     }catch(error){
         console.log(error.message);

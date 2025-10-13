@@ -2,9 +2,8 @@ const exprees = require('express')
 const cors = require('cors')
 const path = require('path')
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
 const connectDB = require('./DataBase/configDB')
-const {User,Label,Form,InformationUser,Submission} = require('./DataBase/schema')
+const {Label,Form} = require('./DataBase/schema')
 const { isValidObjectId } = require('mongoose')
 require('dotenv').config()
 
@@ -13,7 +12,6 @@ const userRoutes = require("./routes/user.routes")
 
 ////////////////////////////////////////////
 
-const saltRounds = 10;
 const app = exprees()
 app.use(cors())
 app.use(exprees.json())
