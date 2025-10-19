@@ -84,7 +84,7 @@ async function resetPassword() {
     } else {
       successMessage.value = "رمز عبور با موفقیت تغییر کرد";
       setTimeout(() => {
-        window.location.href = "http://localhost:5173/profile";
+        window.location.href = "http://localhost/profile";
         newPasswordValue.value = "";
         verifyPasswordValue.value = "";
         successMessage.value = "";
