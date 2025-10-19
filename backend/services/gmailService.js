@@ -77,7 +77,7 @@ class Gmail {
 
         <div style="text-align: center; margin: 25px 0;">
           <a
-            href="http://localhost:5173/password?token=${token}"
+            href="http://localhost/password?token=${token}"
             style="
               background-color: #ff6100;
               color: #fff;
