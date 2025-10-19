@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
 const userService = require("../services/user.service");
 const authorization = require("../services/authorization");
+const gmailService = require("../services/gmailService");
 require("dotenv").config();
 
 const googleService = new GoogleAuth({
@@ -139,11 +140,52 @@ exports.updateUsername = async (req, res) => {
         $set: { username: newUsername },
       }
     );
-    if(updatedUser.matchedCount === 0) {
-      return res.status(404).json({message:"user for update not found"})
+    if (updatedUser.matchedCount === 0) {
+      return res.status(404).json({ message: "user for update not found" });
     }
-    res.status(200).json({message:"username updated"})
+    res.status(200).json({ message: "username updated" });
   } catch (err) {
     res.status(500).json({ message: "error to update username" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const email = req.user.email
+    const password = req.body.newPassword;
+    const user = await User.findOne({email:email}).select("password");
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      return res.status(400).json({
+        message: "رمز جدید نباید مشابه رمز فعلی باشد",
+      });
+    }
+    const hashedPassword = await userService.hashPassword(password);
+    const updatedUser = await User.updateOne(
+      {
+        email: email,
+      },
+      {
+        $set: { password: hashedPassword },
+      }
+    );
+    if (updatedUser.matchedCount === 0) {
+      return res.status(404).json({ message: "user for update not found" });
+    }
+    res.status(200).json({ message: "user password updated", updated: true });
+  } catch (err) {
+    res.status(500).json({ message: "error while reset password" });
+  }
+};
+
+exports.sendResetGmail = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const token = authorization.createResetToken(email);
+    gmailService.sendResetPasswordGmail(email, token);
+    res.status(200).json({ message: "email for reset password sended" });
+  } catch (err) {
+    console.log("error while sendResetGmail in userController");
+    res.status(500).json({ error: "error in server while send email" });
   }
 };

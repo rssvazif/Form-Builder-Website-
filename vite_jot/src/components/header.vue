@@ -233,7 +233,7 @@ const user_store = useSignUp_LoginStore()
     display: flex;
     align-items: center;
     justify-content: space-around;
-    margin-right: 10em;
+    /* margin-right: 10em; */
 }
 
 .menu-bar-items{

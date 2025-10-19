@@ -8,7 +8,12 @@ class Authorization {
     });
     return token;
   }
-  parseJWT() {}
+  createResetToken(data) {
+    const token = jwt.sign({ email: data }, process.env.JWT_SECRET, {
+      expiresIn: "10m",
+    });
+    return token;
+  }
 
   checkToken(token) {
     const selfToken = token.split(" ")[1];

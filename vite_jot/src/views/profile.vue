@@ -15,8 +15,14 @@ const userInfo = ref({
 let prototype = {};
 const errorMessage = ref("");
 const selectedSection = ref("");
+const isSendResetPassword = ref(false);
+const isResendGmail = ref(false);
 onMounted(() => {
   getUserInfo();
+  const token = localStorage.getItem("token")
+  if(!token) {
+    window.location.href = "/"
+  }
 });
 
 async function getUserInfo() {
@@ -100,8 +106,29 @@ async function saveNewUsername() {
     }, 2000);
   }
 }
-async function resetPassword() {
-  ////
+async function resetPassword(isNew) {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch("http://localhost:3000/user/gmail", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ email: userInfo.value.email }),
+    });
+    if (response.status === 200) {
+      isSendResetPassword.value = true;
+      if (!isNew) {
+        isResendGmail.value = true;
+        setTimeout(() => {
+          isResendGmail.value = false;
+        }, 2000);
+      }
+    }
+  } catch (err) {
+    throw new Error("error while send email to reset password");
+  }
 }
 </script>
 
@@ -182,9 +209,68 @@ async function resetPassword() {
           }"
         >
           <b>رمز عبور</b>
-          <button class="reset-password-profile" @click="resetPassword()">
+          <button
+            v-if="!isSendResetPassword"
+            class="reset-password-profile"
+            @click="resetPassword(true)"
+          >
             {{ userInfo.password }}
           </button>
+          <div
+            v-if="isSendResetPassword"
+            style="display: flex; flex-direction: column"
+          >
+            <div style="display: flex; align-items: center">
+              <span style="display: flex; justify-content: center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  class="w-6 h-auto rtl:ml-3 mr-1 sm:-ml-7 shrink-0"
+                >
+                  <path
+                    fill="#252D5B"
+                    fill-rule="evenodd"
+                    d="M12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16"
+                    clip-rule="evenodd"
+                  ></path>
+                  <path
+                    fill="#fff"
+                    fill-rule="evenodd"
+                    d="M12 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2M12 16a1 1 0 0 0 1-1v-3a1 1 0 1 0-2 0v3a1 1 0 0 0 1 1"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </span>
+              <span style="font-size: 14px">
+                ایمیلی جهت تغییر رمز عبور به <b>{{ userInfo.email }}</b> ارسال
+                شد
+              </span>
+            </div>
+            <div>
+              <button
+                @click="resetPassword(false)"
+                class="reset-email-button"
+                style="color: #0099ff"
+              >
+                ارسال مجدد ایمیل
+              </button>
+              <span style="font-size: 14px">یا</span>
+              <button
+                @click="isSendResetPassword = false"
+                class="reset-email-button"
+                style="color: #dc2626"
+              >
+                لغو
+              </button>
+            </div>
+            <span
+              v-if="isResendGmail"
+              style="font-size: 14px; color: #64b300; padding: 5px 7px 0"
+              >ایمیل مجدد ارسال شد</span
+            >
+          </div>
         </div>
         <div
           class="profile-section"
@@ -566,5 +652,13 @@ async function resetPassword() {
   color: #fff;
   padding: 0 8px;
   height: 32px;
+}
+.reset-email-button {
+  background-color: inherit;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  text-decoration: underline;
+  font-family: inherit;
 }
 </style>

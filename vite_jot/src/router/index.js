@@ -4,6 +4,7 @@ import MyWorkspace from '../views/myWorkspace.vue'
 import Build from '../views/build.vue'
 import Form from '../views/from.vue'
 import Profile from "../views/profile.vue"
+import Password from "../views/password.vue"
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -11,7 +12,8 @@ const routes = [
   {path: '/build', name:'Build', component: Build},
   {path: '/build/:label_id', name: 'Build_label', component:Build, props: true},
   {path: '/form/:form_id',name: 'formSubmission' , component:Form , props: true},
-  {path: "/profile",name: "profile", component: Profile}
+  {path: "/profile",name: "profile", component: Profile},
+  {path: "/password",name:"password",component: Password}
 ]
 
 const router = createRouter({

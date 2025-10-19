@@ -272,7 +272,7 @@ function logOut_user(){
     display: flex;
     align-items: center;
     justify-content: space-around;
-    margin-right: 10em;
+    /* margin-right: 10em; */
 }
 
 .menu-bar-items{

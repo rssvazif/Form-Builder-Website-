@@ -10,6 +10,8 @@ router.get("/getUserName", authMiddleware, userControllers.getUserName);
 router.post("/User", userControllers.addNewUser);
 router.post("/login", userControllers.login);
 router.post("/info", authMiddleware, userControllers.getInfo);
-router.post("/newUsername",userControllers.updateUsername)
+router.post("/newUsername", userControllers.updateUsername);
+router.post("/newPassword", authMiddleware, userControllers.resetPassword);
+router.post("/gmail", authMiddleware, userControllers.sendResetGmail);
 
 module.exports = router;
