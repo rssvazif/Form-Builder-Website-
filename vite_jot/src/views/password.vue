@@ -265,7 +265,6 @@ async function resetPassword() {
       </button>
     </form>
   </div>
-  <div class=""></div>
 </template>
 <style scoped>
 .password-page-header * {
